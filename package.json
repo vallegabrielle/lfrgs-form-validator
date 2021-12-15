@@ -1,0 +1,40 @@
+{
+  "name": "form-validator",
+  "version": "1.0.0",
+  "description": "A very generic form validator",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server ./",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brunowacemberg/form-validator.git"
+  },
+  "author": "Bruno Wacemberg",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brunowacemberg/form-validator/issues"
+  },
+  "homepage": "https://github.com/brunowacemberg/form-validator#readme",
+  "dependencies": {
+    "deep-spread": "^1.3.1",
+    "vanilla-masker": "^1.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.0",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.14.0",
+    "@babel/register": "^7.13.16",
+    "babel-loader": "^8.2.2",
+    "browser-sync": "^2.26.14",
+    "cuttr": "^1.3.2",
+    "gulp": "^4.0.2",
+    "http-server": "^13.0.2",
+    "regenerator-runtime": "^0.13.9",
+    "set-value": ">=4.0.1",
+    "tippy.js": "^6.3.2",
+    "webpack": "^5.36.1",
+    "webpack-stream": "^6.1.2"
+  }
+}
