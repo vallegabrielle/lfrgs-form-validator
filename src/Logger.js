@@ -21,7 +21,7 @@ class Logger {
         console.warn(message, context);
     }
     logError(message, _context) {
-        if(!this.showLogs) { return; }
+        // if(!this.showLogs) { return; }
         let context = _context || "";
         console.error(message, context);
     }
