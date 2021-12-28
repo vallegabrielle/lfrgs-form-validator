@@ -145,7 +145,6 @@ export default class FormValidatorField {
             }
 
             let handleFieldInput = (e) => {
-                this._validator.events.onChange && (this._validator.events.onChange(this._validator));
 
                 this.status = undefined;
                 this._status = undefined;
@@ -427,7 +426,6 @@ export default class FormValidatorField {
             }
         }
 
-        this._validator.events.onChange && (this._validator.events.onChange(this._validator));
     }
 
     // Set visual states
