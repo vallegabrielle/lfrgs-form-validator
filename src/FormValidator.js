@@ -72,6 +72,11 @@ export default class FormValidator {
         this.defaultRules = DEFAULT_RULES;
         this._repeatables = {};
         
+        if(!this.$form) {
+            this.logger.logError("init(): Couldn't find a form with id '"+this.formId+"'"); 
+            return false;
+        }
+
         this.logger.log("init(): Registering fields..."); 
 
         this.options.fields.forEach(fieldObject => {
@@ -135,8 +140,12 @@ export default class FormValidator {
         var _validator = this;
 
         var _registerField = (obj) => {
-            obj._validator = _validator;
-            this.fields[obj.name] = new FormValidatorField(obj, this.logger.showLogs);
+            if(!obj.name || !this.$form.querySelector('[name="'+obj.name+'"]')) {
+                this.logger.logError("registerField(): Couldn't find a field with name '"+obj.name+"'"); 
+            } else {
+                obj._validator = _validator;
+                this.fields[obj.name] = new FormValidatorField(obj, this.logger.showLogs);
+            }
         }
 
         if(typeof fieldObject.name === "object") {
