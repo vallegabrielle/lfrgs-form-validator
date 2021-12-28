@@ -579,6 +579,7 @@ export default class FormValidator {
         }
 
         // Process
+        this.events.onTrySubmit && (this.events.onTrySubmit(this));
 
         if(this.getFirstInvalidField()) {
             this.getFirstInvalidField().elements[0].focus()

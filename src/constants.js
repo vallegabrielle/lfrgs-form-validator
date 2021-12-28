@@ -68,6 +68,7 @@ const DEFAULT_OPTIONS = {
         onInit: undefined,
         onBeforeReset: undefined,
         onReset: undefined,
+        onTrySubmit: undefined,
         onBeforeSubmit: undefined,
         onSubmitFail: undefined,
         onSubmit: undefined,
