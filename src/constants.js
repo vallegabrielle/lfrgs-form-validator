@@ -7,8 +7,8 @@ const REPEATABLE_ITEM_DATA_ATTRIBUTE = 'data-form-validator-repeatable-item';
 const DEFAULT_OPTIONS = {
 
     debug: false,
-    enableDataRestore: true, // will be deleted on form submission or reset
-    enableDataRestoreValidation: true, // will be deleted on form submission or reset
+    enableDataRestore: false, // will be deleted on form submission or reset
+    enableDataRestoreValidation: true, // will also remember validation statuses
 
     resetFieldValidationOnChange: true,
     validateFieldOnInput: false,
