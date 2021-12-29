@@ -215,7 +215,7 @@
                                 <div class="col-lg-9">
                                     <div class="form-group">
                                         <label for="field_name">Nome completo</label>
-                                        <input type="text" class="form-control form-control-lg" name="field_name">
+                                        <input type="text" class="form-control form-control-lg" name="field_name" value="adasd">
                                     </div>
                                 </div>
     
@@ -259,11 +259,11 @@
                                 
                                 </div>
     
-                                <a href="#" class="repeatable-btn" onclick="subscriptionForm_validator.addRepeatable('emailRepeatable')">+</a>
-                                <a href="#" class="repeatable-btn" onclick="subscriptionForm_validator.removeRepeatable('emailRepeatable')">-</a>
-                                    
                             </div>
                            
+                            <a href="#" class="repeatable-btn" onclick="subscriptionForm_validator.addRepeatable('emailRepeatable')">+</a>
+                            <a href="#" class="repeatable-btn" onclick="subscriptionForm_validator.removeRepeatable('emailRepeatable')">-</a>
+                                
     
                         </div>
                     </div>
@@ -286,9 +286,33 @@
         
         var subscriptionForm_validator = new FormValidator("subscriptionForm", {
             
-            enableDataRestore: true, // will be deleted on form submission or reset
-       
-            
+            enableDataRestore: true,
+            enableDataRestoreValidation: false, 
+            resetFieldValidationOnChange: false,
+            validateFieldOnBlur: true,
+
+            fieldRenderPreferences: {
+                wrapperClass: "form-group",
+                wrapperHiddenClass: "d-none",
+                wrapperVisibleClass: "d-block",
+                
+                // "Unvalidated" field state
+                showUnvalidatedMessage: true,
+                unvalidatedMessage: "Unvalidated",
+                
+                // "Validating" field state
+                showValidatingMessage: true,
+                validatingMessage: "Validating...",
+                
+                // "Invalid" field state (message will come from first unmatched rule)
+                showInvalidMessage: true,
+
+                // "Valid" field state
+                showValidMessage: true,
+                validMessage: "Field is valid",
+        
+                
+            },
 
             fields: [
                 {
@@ -317,6 +341,7 @@
                     rules: ["required","email",{
                         async: true,
                         fn: (value, parameter, cb) => {
+                            alert();
                             setTimeout(function() {cb(value !== "bruno.wacemberg@liferay.com")}, 2000)
                         },
                         message: "Email ja existe"
