@@ -179,7 +179,7 @@ export default class FormValidatorField {
             var timeout;
             let handleFieldValidationOnBlur = () => {
 
-                if(this.getValidateFieldOnBlur()) {
+                if(this.getValidateFieldOnBlur() && this.interactive) {
 
                     if(eventName === 'change') {
                         this.setUnvalidated();
@@ -261,6 +261,9 @@ export default class FormValidatorField {
                         $field.checked = false
                     }
                 } else {
+                    if(!value[i]) {
+                        value[i] = ""
+                    }
                     $field.value = value[i]
                 }
             })
@@ -276,6 +279,9 @@ export default class FormValidatorField {
                         $field.checked = false
                     }
                 } else {
+                    if(!value) {
+                        value = ""
+                    }
                     $field.value = value
                 }
             })
