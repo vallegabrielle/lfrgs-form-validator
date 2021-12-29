@@ -150,7 +150,7 @@ export default class FormValidatorField {
                 this._status = undefined;
 
                 if(this.getResetFieldValidationOnChange()) {
-                    this.resetValidation();
+                    this.setUnvalidated();
                     $field.focus()
                 }
             
@@ -182,7 +182,7 @@ export default class FormValidatorField {
                 if(this.getValidateFieldOnBlur()) {
 
                     if(eventName === 'change') {
-                        this.resetValidation();
+                        this.setUnvalidated();
                         $field.focus()
                     }
                     let validate = () => {
@@ -209,7 +209,6 @@ export default class FormValidatorField {
                 $field.removeAttribute(constants.INITIALIZED_FIELD_DATA_ATTRIBUTE);
             })
 
-
         })
 
         if(this.mask) {
@@ -217,7 +216,7 @@ export default class FormValidatorField {
         }
 
         this.unregister = () => {
-            this.resetValidation();
+            this.setUnvalidated();
             unregisterFns.forEach(fn => {
                 fn()
             })
@@ -362,26 +361,20 @@ export default class FormValidatorField {
     _setFieldValidationStatus(statusName, message, silentMode=false) {
 
         var capitalizedStatusName = statusName.charAt(0).toUpperCase() + statusName.slice(1);
-        
-        if(statusName === "validating") {
-            this.resetValidation();
 
+        if(statusName === "validating") {
             this._status = -1;
             this.disableInteraction();
             if(!silentMode) {
                 this.status = -1;
             }
         } else if(statusName === "valid") {
-            this.resetValidation();
-
             this._status = 1;
             this.enableInteraction();
             if(!silentMode) {
                 this.status = 1;
             }
         } else if(statusName === "invalid") {
-            this.resetValidation();
-
             this._status = 0; //invalid 
             this.enableInteraction();
             if(!silentMode) {
@@ -398,6 +391,8 @@ export default class FormValidatorField {
         this.message = message;
 
         if(!silentMode) {
+
+            this.removeValidationElements();
 
             var fieldRenderPreferences = this.getFieldRenderPreferences()
 
@@ -424,12 +419,17 @@ export default class FormValidatorField {
                 this.$wrapper.appendChild($message);
                 this.validationElements.push($message);
             }
+            
         }
 
     }
 
     // Set visual states
     setUnvalidated(message, silentMode) {
+
+        if(!message || !message.length) {
+            message = this.getFieldRenderPreferences().unvalidatedMessage;
+        }
         this._setFieldValidationStatus("unvalidated", message, silentMode); 
     }
     setValidating(message, silentMode) {
@@ -447,6 +447,10 @@ export default class FormValidatorField {
         
         let fieldRenderPreferences = this.getFieldRenderPreferences()
 
+        this.$wrapper.classList.remove(fieldRenderPreferences.wrapperUnvalidatedClass);
+        this.elements.forEach($field => {
+            $field.classList.remove(fieldRenderPreferences.unvalidatedClass);
+        })
         this.$wrapper.classList.remove(fieldRenderPreferences.wrapperValidatingClass);
         this.elements.forEach($field => {
             $field.classList.remove(fieldRenderPreferences.validatingClass);
@@ -464,15 +468,6 @@ export default class FormValidatorField {
             validationElement.remove()
         })
         this.validationElements = [];
-    }
-
-    resetValidation() {
-        
-        this.logger.log("resetValidation(): Resetting field validation");
-
-        this.removeValidationElements();
-        this.setUnvalidated(undefined)
-
     }
     
     isValid() {
@@ -557,6 +552,7 @@ export default class FormValidatorField {
                     
                     (events && events.onValidateField) && (events.onValidateField(this));
                     this._validator.updateDependencyRules()
+                    this._validator.updateFormState()
 
                 });
 
@@ -569,6 +565,7 @@ export default class FormValidatorField {
                 
                 (events && events.onValidateField) && (events.onValidateField(this));
                 this._validator.updateDependencyRules()
+                this._validator.updateFormState()
 
             }
 
