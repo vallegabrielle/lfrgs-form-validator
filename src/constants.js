@@ -8,6 +8,8 @@ const DEFAULT_OPTIONS = {
 
     debug: false,
     enableDataRestore: true, // will be deleted on form submission or reset
+    dataRestoreValidation: true, // will be deleted on form submission or reset
+
     resetFieldValidationOnChange: true,
     validateFieldOnInput: false,
     validateFieldOnBlur: true,
@@ -20,6 +22,15 @@ const DEFAULT_OPTIONS = {
         wrapperHiddenClass: "d-none",
         wrapperVisibleClass: "d-block",
         
+        // "Unvalidated" field state 
+        showUnvalidatedMessage: false,
+        unvalidatedMessage: "Unvalidated",
+        unvalidatedMessageHTML: "<div class=\"valid-feedback text-muted d-block\">{{message}}</div>",
+        addUnvalidatedClass: true,
+        unvalidatedClass: "is-unvalidated",
+        addWrapperUnvalidatedClass: true,
+        wrapperUnvalidatedClass: "is-unvalidated",
+
         // "Validating" field state
         showValidatingMessage: true,
         validatingMessage: "Validating...",
@@ -29,15 +40,6 @@ const DEFAULT_OPTIONS = {
         addWrapperValidatingClass: true,
         wrapperValidatingClass: "is-validating",
         
-        // "Valid" field state
-        showValidMessage: true,
-        validMessage: "Field is valid",
-        validMessageHTML: "<div class=\"valid-feedback text-success d-block\">{{message}}</div>",
-        addValidClass: true,
-        validClass: "is-valid",
-        addWrapperValidClass: true,
-        wrapperValidClass: "is-valid",
-        
         // "Invalid" field state (message will come from first unmatched rule)
         showInvalidMessage: true,
         invalidMessageHTML: "<div class=\"invalid-feedback text-danger d-block\">{{message}}</div>",
@@ -45,15 +47,16 @@ const DEFAULT_OPTIONS = {
         invalidClass: "is-invalid",
         addWrapperInvalidClass: true,
         wrapperInvalidClass: "is-invalid",
-
-        // "Invalid" field state (message will come from first unmatched rule)
-        showUnvalidatedMessage: true,
-        unvalidatedMessage: "Validating...",
-        unvalidatedMessageHTML: "<div class=\"unvalidated-feedback text-muted d-block\">{{message}}</div>",
-        addUnvalidatedClass: true,
-        unvalidatedClass: "is-unvalidated",
-        addWrapperUnvalidatedClass: true,
-        wrapperUnvalidatedClass: "is-unvalidated"
+        
+        // "Valid" field state
+        showValidMessage: true,
+        validMessage: "Field is valid",
+        validMessageHTML: "<div class=\"valid-feedback text-success d-block\">{{message}}</div>",
+        addValidClass: true,
+        validClass: "is-valid",
+        addWrapperValidClass: true,
+        wrapperValidClass: "is-valid"
+        
     },
     
     fields: [

@@ -67,6 +67,8 @@ export default class FormValidator {
         this.groupWrapperHiddenClass = this.options.groupWrapperHiddenClass;
         this.groupWrapperVisibleClass = this.options.groupWrapperVisibleClass;
         this.enableDataRestore = this.options.enableDataRestore;
+        this.enableDataRestoreValidation = this.options.enableDataRestoreValidation;
+
         this.submitting = false;
         this.fields = {};
         this.defaultRules = DEFAULT_RULES;
@@ -105,14 +107,14 @@ export default class FormValidator {
         
         if(this.enableDataRestore) {
             this.applyFormState();
-            this._validate([], true).then(() => {}).catch(() => {})
+            this.updateFormState();
+        } else { 
+            this.resetForm();
         }
 
         this.updateDependencyRules()
-
         
         this.events.onInit && (this.events.onInit(this));
-  
 
         this.logger.log("init(): Validator has been initialized", this);   
 
@@ -282,11 +284,11 @@ export default class FormValidator {
         
         if(!fieldsNames.length) {
             this.eachField((field) => {
-                field.resetValidation();
+                field.setUnvalidated();
             }) 
         } else {
             fieldsNames.forEach(fieldName => {
-                this.fields[fieldName].resetValidation();
+                this.fields[fieldName].setUnvalidated();
             })
         }
 
@@ -302,9 +304,10 @@ export default class FormValidator {
 
         this.events.onBeforeReset && (this.events.onBeforeReset(this));
 
+        this.deleteFormState()
         this.$form.reset();
         this.resetValidation()
-        this.deleteFormState()
+
 
         if(this._repeatables) {
             Object.keys(this._repeatables).forEach((repeatableInstanceIdentifier) => {
@@ -347,6 +350,7 @@ export default class FormValidator {
             "repeatables": this._repeatables,
             "validation": validationStatuses
         }));
+
     }
 
     applyFormState() {
@@ -365,16 +369,37 @@ export default class FormValidator {
                 })
             }
 
-            let serializedForm = storage.data;
+            if(storage.data) {
+                let serializedForm = storage.data;
 
-            Object.keys(serializedForm).forEach(key => {
-                let value = serializedForm[key]
-                if(this.fields[key]) {
-                    this.fields[key].setValue(value)
+                Object.keys(serializedForm).forEach(key => {
+                    let value = serializedForm[key];
+                    let field = this.fields[key];
+                    if(field) {
+                        field.setValue(value)
+                        if(this.enableDataRestoreValidation && storage.validation && storage.validation[key] !== undefined) {
+                            let validation = storage.validation[key];
+                            if(validation.status === 1) { 
+                                field.setValid(validation.message)
+                            } else if(validation.status === 0) { 
+                                field.setInvalid(validation.message)
+                            } else {
+                                field.setUnvalidated()
+                            }
+                        }
+                    }
+                    
+                })
+
+                if(!this.enableDataRestoreValidation) {
+                    this.resetValidation()
                 }
-            })
 
+            }
 
+        }
+        else {
+            this.resetValidation()
         }
     }
 
@@ -656,20 +681,18 @@ export default class FormValidator {
         let repeatingFieldsNames = this.getNodeChildrenFieldsNames($firstItem);
         
         let revalidatingFieldsNames = [];
+        let unvalidatingFieldsNames = [];
+
         repeatingFieldsNames.forEach(fieldName => {
+            this.fields[fieldName].removeValidationElements();
             if(this.fields[fieldName].status === 0 || this.fields[fieldName].status === 1 || this.fields[fieldName].status === -1) {
                 revalidatingFieldsNames.push(fieldName)
-                this.fields[fieldName].removeValidationElements();
-                this.fields[fieldName].setUnvalidated();
+            } else {
+                unvalidatingFieldsNames.push(fieldName)
             }
         })
 
         let $clone = $firstItem.cloneNode(true);
-        
-        revalidatingFieldsNames.forEach(fieldName => {
-            this.fields[fieldName].validate();
-        })
-
         
         repeatingFieldsNames.forEach((fieldName) => {
             let newFieldName = fieldName+itemsCount;
@@ -697,13 +720,20 @@ export default class FormValidator {
             if(clearValue) {
                 this.fields[newFieldName].setValue('');
             }
-            this.fields[newFieldName].resetValidation();
+            this.fields[newFieldName].setUnvalidated();
+            
             
         })
             
-        if(clearValue) {
-            this.updateFormState()
-        }
+        revalidatingFieldsNames.forEach(fieldName => {
+            this.fields[fieldName].validate();
+        })
+        unvalidatingFieldsNames.forEach(fieldName => {
+            this.fields[fieldName].setUnvalidated();
+        })
+
+        this.updateFormState()
+
             
 
     }
