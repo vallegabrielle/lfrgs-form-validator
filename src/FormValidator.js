@@ -95,7 +95,7 @@ export default class FormValidator {
             if(this.enableDataRestore) {
                 this.updateFormState();
             }
-            this.updateDependencyRules(true)
+            this.updateDependencyRules(true);
         }
         this.$form.addEventListener('change', handleFormChange)
 
@@ -536,7 +536,10 @@ export default class FormValidator {
 
                 })
             }
-        })
+        });
+
+        (this._onUpdate) && this._onUpdate();
+
     }
 
 

@@ -185,7 +185,9 @@
                 </div>
 
               
+                <div id="steps">
 
+                </div>
 
                 <form class="mt-lg-5 px-3" id="step1" action="#" autocomplete="off" style="position: relative">
                 
@@ -250,6 +252,8 @@
                 </form>
 
                 <div class="d-flex justify-content-center justify-content-md-between mt-4 px-3 px-md-0 pb-3 pb-lg-0 text-center">
+                    <input type="button" onclick="event.preventDefault(); handler.previous()" class="btn btn-primary btn-lg" value="Anterior">
+
                     <input type="submit" onclick="event.preventDefault(); handler.next()" class="btn btn-primary btn-lg" value="Proxima">
                 </div>
 
@@ -263,7 +267,7 @@
     <script>
         
         var step1_validator = new FormValidator("step1", {
-            
+            enableDataRestore: true,
             fields: [
                 {
                     name: "field_name",
@@ -282,7 +286,7 @@
 
 
         var step2_validator = new FormValidator("step2", {
-            
+            enableDataRestore: true,
             fields: [
                 {
                     name: "field_card",
@@ -298,27 +302,29 @@
             
         })
 
-        
+    
 
-            var handler = new FormValidatorStepsHandler({
-                steps: [
-                    {
-                        title: "Passo 1: Dados pessoais",
-                        formValidatorInstance: step1_validator,
+        var handler = new FormValidatorStepsHandler({
+            steps: [
+                {
+                    title: "Passo 1: Dados pessoais",
+                    formValidatorInstance: step1_validator,
 
-                    },
-                    {
-                        title: "Passo 2: Pagamento",
-                        formValidatorInstance: step2_validator,
+                },
+                {
+                    title: "Passo 2: Pagamento",
+                    formValidatorInstance: step2_validator,
 
-                    }
+                }
 
-                ]
-            })
+            ],
+            onUpdate: function() {  
+                document.getElementById('steps').innerHTML = "Voce está na step "+this.currentStepIndex
+                console.log(this)
+            }
+        })
 
-            handler.setStep(0)
-
-
+        handler.setStep(0)
         
         
 

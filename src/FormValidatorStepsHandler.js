@@ -16,7 +16,9 @@ class FormValidatorStepsHandler {
 
         this.steps = options.steps;
         this.currentStepIndex = undefined;
+        this.onUpdate = options.onUpdate;
 
+        return this.init()
     }
 
     init() {
@@ -25,11 +27,15 @@ class FormValidatorStepsHandler {
             return;
         }
 
-        for(let i = 0; i < steps.length; i++) {
-            let step = steps[i];
+        for(let i = 0; i < this.steps.length; i++) {
+            let step = this.steps[i];
             let $stepForm = step.formValidatorInstance.$form;
 
             let handleStepFormChange = (e) => {
+                // this.update()
+            }
+
+            step.formValidatorInstance._onUpdate = () => {
                 this.update()
             }
 
@@ -43,8 +49,11 @@ class FormValidatorStepsHandler {
 
         }
 
-        this.update();
         this.start(); // TODO: if config says it auto starts
+
+        this.update();
+
+        return this
         
     }
 
@@ -56,8 +65,6 @@ class FormValidatorStepsHandler {
         for(let i = 0; i < this.steps.length; i++) {
             let step = this.steps[i];
             
-            console.log("updating step " + i)
-
             let status;
             let enabled;
 
@@ -82,11 +89,10 @@ class FormValidatorStepsHandler {
                 status: status,
                 enabled: enabled
             };
-
-
-
             
         }
+
+        (this.onUpdate) && this.onUpdate();
         
     }
 
@@ -108,7 +114,8 @@ class FormValidatorStepsHandler {
             
             this.steps[stepIndex].formValidatorInstance.$form.classList.remove('d-none');
             this.currentStepIndex = stepIndex;
-    
+            this.update()
+
         }   
 
     }
@@ -122,6 +129,13 @@ class FormValidatorStepsHandler {
 
     forEachStep(fn, i) {
         
+    }
+
+    reset() {
+        for(let i = 0; i < this.steps.length; i++) {
+            let step = this.steps[i];
+            step.formValidatorInstance.resetForm();
+        }
     }
 
 
