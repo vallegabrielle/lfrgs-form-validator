@@ -17,6 +17,7 @@ class FormValidatorStepsHandler {
         this.steps = options.steps;
         this.currentStepIndex = undefined;
         this.onUpdate = options.onUpdate;
+        this.enableStrictStepsOrder = options.enableStrictStepsOrder;
 
         return this.init()
     }
@@ -60,8 +61,6 @@ class FormValidatorStepsHandler {
 
     update() {
 
-        console.log("update")
-
         for(let i = 0; i < this.steps.length; i++) {
             let step = this.steps[i];
             
@@ -98,15 +97,11 @@ class FormValidatorStepsHandler {
 
     setStep(stepIndex) {
 
-        if(stepIndex < 0 || stepIndex >= this.steps.length) {
+        if(stepIndex < 0 || stepIndex >= this.steps.length || !this.steps[stepIndex]) {
             return;
         }
 
-        if(this.steps[stepIndex-1]) {
-            this.steps[stepIndex-1].formValidatorInstance.validate()
-        }
-        if(stepIndex === 0 || this.steps[stepIndex-1].formValidatorInstance.isValid()) {
-          
+        let _setStep = () => {
             for(let i = 0; i < this.steps.length; i++) {
                 let step = this.steps[i];
                 step.formValidatorInstance.$form.classList.add('d-none');
@@ -115,14 +110,38 @@ class FormValidatorStepsHandler {
             this.steps[stepIndex].formValidatorInstance.$form.classList.remove('d-none');
             this.currentStepIndex = stepIndex;
             this.update()
+        }
+        
+        if(this.enableStrictStepsOrder) {
 
-        }   
+            let validatorsPromises = [];
+            for(let i = stepIndex-1; i>=0; i--) {
+                validatorsPromises.push(this.steps[i].formValidatorInstance._validate());
+            }
+
+
+            Promise.all(validatorsPromises).then(() => {
+                _setStep()
+            }).catch(() => {
+                debugger;
+                if(this.steps[stepIndex].formValidatorInstance.isValid()) {
+                    _setStep()
+                }
+            })
+
+            
+        } else {
+            _setStep()
+        }
 
     }
 
     next() {
-        this.setStep(this.currentStepIndex + 1);
+        this.steps[this.currentStepIndex].formValidatorInstance._validate().then(() => {
+            this.setStep(this.currentStepIndex + 1);
+        }).catch(() => {})
     }
+
     previous() {
         this.setStep(this.currentStepIndex - 1);
     }
@@ -136,6 +155,7 @@ class FormValidatorStepsHandler {
             let step = this.steps[i];
             step.formValidatorInstance.resetForm();
         }
+        this.setStep(0);
     }
 
 

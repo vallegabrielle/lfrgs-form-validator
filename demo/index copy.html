@@ -251,6 +251,32 @@
         
                 </form>
 
+                <form class="mt-lg-5 px-3" id="step3" action="#" autocomplete="off" style="position: relative">
+                
+                    <div class="card mt-3">
+                        <div class="card-title pl-4">
+                            <h2 class="">3: Conclusão</h2>
+                        </div>
+                        <div class="card-body mt-0 pt-2 px-4">
+    
+                            <div class="row">
+
+                                <div class="col-lg-9">
+                                    <div class="form-group">
+                                        <label for="field_test3">Teste3</label>
+                                        <input type="text" class="form-control form-control-lg" name="field_test3" id="field_test3">
+                                    </div>
+                                </div>
+    
+
+    
+                            </div>
+    
+                        </div>
+                    </div>
+        
+                </form>
+
                 <div class="d-flex justify-content-center justify-content-md-between mt-4 px-3 px-md-0 pb-3 pb-lg-0 text-center">
                     <input type="button" onclick="event.preventDefault(); handler.previous()" class="btn btn-primary btn-lg" value="Anterior">
 
@@ -265,9 +291,13 @@
     </div>
     
     <script>
-        
+
+        FormValidator.setDefaultOptions({
+            enableDataRestore: false
+        });
+
+
         var step1_validator = new FormValidator("step1", {
-            enableDataRestore: true,
             fields: [
                 {
                     name: "field_name",
@@ -278,7 +308,6 @@
                     name: ["field_cpf"], 
                     group: "personal",
                     rules: ["required"],
-                    mask: "999.999.999-99"
                 }
             ]
             
@@ -286,7 +315,6 @@
 
 
         var step2_validator = new FormValidator("step2", {
-            enableDataRestore: true,
             fields: [
                 {
                     name: "field_card",
@@ -302,9 +330,21 @@
             
         })
 
+        var step3_validator = new FormValidator("step3", {
+            fields: [
+                {
+                    name: "field_test3",
+                    group: "personal",
+                    rules: ["required"]
+                }
+            ]
+            
+        })
+
     
 
         var handler = new FormValidatorStepsHandler({
+            enableStrictStepsOrder: true,
             steps: [
                 {
                     title: "Passo 1: Dados pessoais",
@@ -315,16 +355,28 @@
                     title: "Passo 2: Pagamento",
                     formValidatorInstance: step2_validator,
 
+                },
+                {
+                    title: "Passo 3: Conclusão",
+                    formValidatorInstance: step3_validator,
                 }
 
             ],
             onUpdate: function() {  
-                document.getElementById('steps').innerHTML = "Voce está na step "+this.currentStepIndex
-                console.log(this)
+
+                let steps = "";
+                this.steps.forEach((step, i) => {
+                    if(step._state.active) {
+                        steps += `<a href="#" onclick="event.preventDefault();"><strong> [${i}] </strong></a>`
+                    } else {
+                        steps += `<a href="#" onclick="event.preventDefault(); handler.setStep(${i})">[${i}]</a>`
+                    }
+                })
+                document.getElementById('steps').innerHTML = steps
+
             }
         })
 
-        handler.setStep(0)
         
         
 

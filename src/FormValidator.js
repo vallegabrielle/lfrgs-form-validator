@@ -16,6 +16,10 @@ const removeUndefinedObjectKeys = (obj) => {
 };
 
 export default class FormValidator {
+
+    static setDefaultOptions(options) {
+        constants.DEFAULT_OPTIONS = deepSpread(options, constants.DEFAULT_OPTIONS);
+    }
     
     constructor(formId, options={}) {
             
@@ -24,7 +28,7 @@ export default class FormValidator {
         this.logger.log("constructor(): New validator instance");
         this.formId = formId;
 
-        this.options = deepSpread(options, constants.DEFAULT_OPTIONS);;
+        this.options = deepSpread(options, constants.DEFAULT_OPTIONS);
         
         if(!document.getElementById(formId)) {
             this.logger.logError("constructor(): Couldn't find form element \"#"+formId+"\"");
