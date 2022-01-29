@@ -1,10 +1,11 @@
 import constants from './constants';
-import DEFAULT_RULES from './defaultRules'
+import defaultRules from './defaultRules'
 import FormValidatorRule from './FormValidatorRule';
 import FormValidatorField from './FormValidatorField';
 import Logger from './Logger';
 import { deepSpread } from 'deep-spread';
 
+var DEFAULT_RULES = defaultRules;
 
 const removeUndefinedObjectKeys = (obj) => {
     Object.keys(obj).forEach(key => {
@@ -19,6 +20,21 @@ export default class FormValidator {
 
     static setDefaultOptions(options) {
         constants.DEFAULT_OPTIONS = deepSpread(options, constants.DEFAULT_OPTIONS);
+    }
+
+    static setDefaultRules(rules) {
+
+        rules.forEach(rule => {
+
+            if(rule.name) {
+                if(DEFAULT_RULES[rule.name]) {
+                    rule = deepSpread(rule, DEFAULT_RULES[rule.name])   
+                }
+                DEFAULT_RULES[rule.name] = rule;
+            }
+            
+        })
+
     }
     
     constructor(formId, options={}) {
@@ -71,12 +87,12 @@ export default class FormValidator {
         this.groupWrapperHiddenClass = this.options.groupWrapperHiddenClass;
         this.groupWrapperVisibleClass = this.options.groupWrapperVisibleClass;
         this.enableDataRestore = this.options.enableDataRestore;
-        this.enableDataRestoreValidation = this.options.enableDataRestoreValidation;
+        this.enableValidateAfterDataRestore = this.options.enableValidateAfterDataRestore;
 
         this.submitting = false;
         this.fields = {};
-        this.defaultRules = DEFAULT_RULES;
         this._repeatables = {};
+        this.defaultRules = DEFAULT_RULES;
         
         if(!this.$form) {
             this.logger.logError("init(): Couldn't find a form with id '"+this.formId+"'"); 
@@ -381,7 +397,7 @@ export default class FormValidator {
                     let field = this.fields[key];
                     if(field) {
                         field.setValue(value)
-                        if(this.enableDataRestoreValidation && storage.validation && storage.validation[key] !== undefined) {
+                        if(this.enableValidateAfterDataRestore && storage.validation && storage.validation[key] !== undefined) {
                             let validation = storage.validation[key];
                             if(validation.status === 1) { 
                                 field.setValid(validation.message)
@@ -395,7 +411,7 @@ export default class FormValidator {
                     
                 })
 
-                if(!this.enableDataRestoreValidation) {
+                if(!this.enableValidateAfterDataRestore) {
                     this.resetValidation()
                 }
 
@@ -521,8 +537,8 @@ export default class FormValidator {
                     }
 
                     
-                    if(this.defaultRules[depRuleObject.name]) {
-                        depRuleObject = {...this.defaultRules[depRuleObject.name], ...removeUndefinedObjectKeys(depRuleObject)}
+                    if(DEFAULT_RULES[depRuleObject.name]) {
+                        depRuleObject = {...DEFAULT_RULES[depRuleObject.name], ...removeUndefinedObjectKeys(depRuleObject)}
                     }
 
 

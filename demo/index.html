@@ -215,7 +215,7 @@
                                 <div class="col-lg-9">
                                     <div class="form-group">
                                         <label for="field_name">Nome completo</label>
-                                        <input type="text" class="form-control form-control-lg" name="field_name" value="adasd">
+                                        <input type="text" class="form-control form-control-lg" name="field_name" value="">
                                     </div>
                                 </div>
     
@@ -284,10 +284,20 @@
     
     <script>
         
-        var subscriptionForm_validator = new FormValidator("subscriptionForm", {
-            
+        // Set default validators (or only replace their message) 
+        FormValidator.setDefaultRules([
+            {name: "required", message: "Campo obrigatório"},
+            {name: "email", message: "E-mail inválido"},
+            {name: "cpf", message: "CPF inválido"},
+            {name: "custom", message: "Campo tem q ser bbb", fn: function(value, parameter) {
+                return value === "bbb"
+            }}
+        ])
+
+        // Set default validator preferences
+        FormValidator.setDefaultOptions({
             enableDataRestore: false,
-            enableDataRestoreValidation: true, 
+            enableValidateAfterDataRestore: false, 
 
             resetFieldValidationOnChange: false,
             validateFieldOnBlur: true,
@@ -311,15 +321,23 @@
                 // "Valid" field state
                 showValidMessage: true,
                 validMessage: "Field is valid",
-        
                 
-            },
+            }
+
+        })
+
+        var subscriptionForm_validator = new FormValidator("subscriptionForm", {
+            enableDataRestore: true,
+            enableValidateAfterDataRestore: true, 
 
             fields: [
                 {
                     name: "field_name",
                     group: "personal",
-                    rules: ["required", "minLength:3"]
+                    rules: ["required", "minLength:3", "custom"],
+                    getValueFn: function(field) {
+                        return field.elements[0].value
+                    }
                 },
                 // {
                 //     name: ["field_cpf"], 
@@ -421,11 +439,7 @@
                 },
 
                 onInit: function(validator) {
-                    validator.defaultRules.required.message = "Campo obrigatório"
-                    validator.defaultRules.minLength.message = "Campo inválido"
-                    validator.defaultRules.cpf.message = "Digite um CPF válido"
-                    validator.defaultRules.date.message = "Digite uma data válida"
-                    validator.defaultRules.phone.message = "Digite um telefone válido."
+
                 }
             }
             
