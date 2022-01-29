@@ -61,6 +61,9 @@ export default class FormValidatorField {
         this.resetFieldValidationOnChange = fieldObject.resetFieldValidationOnChange;
         this.validateFieldOnInput = fieldObject.validateFieldOnInput;
         this.validateFieldOnBlur = fieldObject.validateFieldOnBlur;
+        this.getValueFn = fieldObject.getValueFn;
+        this.setValueFn = fieldObject.setValueFn;
+
         
         this.register();
         
@@ -231,64 +234,79 @@ export default class FormValidatorField {
     }
 
     getValue() {
-        if(this.elements.length > 1) { // radio or checkbox
-            let value = [];
-            if(this.elements[0].getAttribute("type") === "radio" || this.elements[0].getAttribute("type") === "checkbox") {
-                this.elements.forEach($field => {
-                    if($field.checked) {
-                        value.push($field.value)
-                    }
-                })
-            }
-            return value
+
+        if(this.getValueFn && typeof this.getValueFn === 'function') {
+            return this.getValueFn(this)
         } else {
-            return this.elements[0].value
+    
+            if(this.elements.length > 1) { // radio or checkbox
+                let value = [];
+                if(this.elements[0].getAttribute("type") === "radio" || this.elements[0].getAttribute("type") === "checkbox") {
+                    this.elements.forEach($field => {
+                        if($field.checked) {
+                            value.push($field.value)
+                        }
+                    })
+                }
+                return value
+            } else {
+                return this.elements[0].value
+            }
         }
+        
         
     }
 
     setValue(value) {
 
-        if(typeof value === "object") {
-            this.elements.forEach(($field, i) => {
-                if($field.hasAttribute('readonly') || $field.hasAttribute('disabled')) {
-                    return;
-                }
-                if($field.getAttribute("type") === "radio" || $field.getAttribute("type") === "checkbox") {
-                    if(value.includes($field.value)) {
-                        $field.checked = true
-                    } else {
-                        $field.checked = false
-                    }
-                } else {
-                    if(!value[i]) {
-                        value[i] = ""
-                    }
-                    $field.value = value[i]
-                }
-            })
-        } else {
-            this.elements.forEach(($field, i) => {
-                if($field.hasAttribute('readonly') || $field.hasAttribute('disabled')) {
-                    return;
-                }
-                if($field.getAttribute("type") === "radio" || $field.getAttribute("type") === "checkbox") {
-                    if(value === $field.value) {
-                        $field.checked = true
-                    } else {
-                        $field.checked = false
-                    }
-                } else {
-                    if(!value) {
-                        value = ""
-                    }
-                    $field.value = value
-                }
-            })
-        }
+        if(this.setValueFn && typeof this.setValueFn === 'function') {
+            this.setValueFn(this);
+            this._validator.updateDependencyRules();
 
-        this._validator.updateDependencyRules();
-        
+        } else {
+
+            if(typeof value === "object") {
+                this.elements.forEach(($field, i) => {
+                    if($field.hasAttribute('readonly') || $field.hasAttribute('disabled')) {
+                        return;
+                    }
+                    if($field.getAttribute("type") === "radio" || $field.getAttribute("type") === "checkbox") {
+                        if(value.includes($field.value)) {
+                            $field.checked = true
+                        } else {
+                            $field.checked = false
+                        }
+                    } else {
+                        if(!value[i]) {
+                            value[i] = ""
+                        }
+                        $field.value = value[i]
+                    }
+                })
+            } else {
+                this.elements.forEach(($field, i) => {
+                    if($field.hasAttribute('readonly') || $field.hasAttribute('disabled')) {
+                        return;
+                    }
+                    if($field.getAttribute("type") === "radio" || $field.getAttribute("type") === "checkbox") {
+                        if(value === $field.value) {
+                            $field.checked = true
+                        } else {
+                            $field.checked = false
+                        }
+                    } else {
+                        if(!value) {
+                            value = ""
+                        }
+                        $field.value = value
+                    }
+                })
+            }
+
+            this._validator.updateDependencyRules();
+
+        }
+                
     }
 
     
