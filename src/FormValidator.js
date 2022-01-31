@@ -39,31 +39,29 @@ export default class FormValidator {
     
     constructor(formId, options={}) {
             
-        this.logger = new Logger(options.debug);
+        this._logger = new Logger(options.debug);
 
-        this.logger.log("constructor(): New validator instance");
+        this._logger.log("constructor(): New validator instance");
         this.formId = formId;
 
         this.options = deepSpread(options, constants.DEFAULT_OPTIONS);
         
         if(!document.getElementById(formId)) {
-            this.logger.logError("constructor(): Couldn't find form element \"#"+formId+"\"");
+            this._logger.logError("constructor(): Couldn't find form element \"#"+formId+"\"");
             return;
         } else {
-            this.logger.log("constructor(): Validator will be initialized to \"#"+formId+"\"");
+            this._logger.log("constructor(): Validator will be initialized to \"#"+formId+"\"");
 
                 // Register instance
             if(!window.formValidator_instances) {
                 window.formValidator_instances = {}
             }
-            if(!window.formValidator_instances[this.formId]) {
-                window.formValidator_instances[this.formId] = this;
-                
-                return this.init();
-                
-            } else {
-                this.logger.logError("init(): A FormValidator instance has already been initialized for the form \"#"+this.formId+"\"");   
+            if(window.formValidator_instances[this.formId]) {
+                window.formValidator_instances[this.formId].destroy();
             }
+
+            window.formValidator_instances[this.formId] = this;
+            return this.init();
             
         }
         
@@ -71,7 +69,7 @@ export default class FormValidator {
 
 
     init() {
-        this.logger.log("init(): Initializing validator...");   
+        this._logger.log("init(): Initializing validator...");   
 
         this.$form = document.getElementById(this.formId);
         
@@ -84,6 +82,8 @@ export default class FormValidator {
         this.submitFn = this.options.submitFn;
         this.showLoadingFn = this.options.showLoadingFn;
         this.hideLoadingFn = this.options.hideLoadingFn;
+        this.formDisabledClass = this.options.formDisabledClass;
+        this.formEnabledClass = this.options.formEnabledClass;
         this.groupWrapperHiddenClass = this.options.groupWrapperHiddenClass;
         this.groupWrapperVisibleClass = this.options.groupWrapperVisibleClass;
         this.enableDataRestore = this.options.enableDataRestore;
@@ -95,11 +95,11 @@ export default class FormValidator {
         this.defaultRules = DEFAULT_RULES;
         
         if(!this.$form) {
-            this.logger.logError("init(): Couldn't find a form with id '"+this.formId+"'"); 
+            this._logger.logError("init(): Couldn't find a form with id '"+this.formId+"'"); 
             return false;
         }
 
-        this.logger.log("init(): Registering fields..."); 
+        this._logger.log("init(): Registering fields..."); 
 
         this.options.fields.forEach(fieldObject => {
             this.registerField(fieldObject);
@@ -136,11 +136,11 @@ export default class FormValidator {
         
         this.events.onInit && (this.events.onInit(this));
 
-        this.logger.log("init(): Validator has been initialized", this);   
+        this._logger.log("init(): Validator has been initialized", this);   
 
 
         this.destroy = () => {
-            this.logger.log("destroy(): Destroying validator...");    
+            this._logger.log("destroy(): Destroying validator...");    
             this.deleteFormState();
             this.resetValidation();
             this.eachField((field) => {
@@ -163,10 +163,10 @@ export default class FormValidator {
 
         var _registerField = (obj) => {
             if(!obj.name || !this.$form.querySelector('[name="'+obj.name+'"]')) {
-                this.logger.logError("registerField(): Couldn't find a field with name '"+obj.name+"'"); 
+                this._logger.logError("registerField(): Couldn't find a field with name '"+obj.name+"'"); 
             } else {
                 obj._validator = _validator;
-                this.fields[obj.name] = new FormValidatorField(obj, this.logger.showLogs);
+                this.fields[obj.name] = new FormValidatorField(obj, this._logger.showLogs);
             }
         }
 
@@ -265,7 +265,7 @@ export default class FormValidator {
 
     _validate(fieldsNames=[], silentMode=false) {
 
-        this.logger.log("validate(): Form will be validated");
+        this._logger.log("validate(): Form will be validated");
         this.events.onBeforeValidate && (this.events.onBeforeValidate(this));
         
         let handleValidationPromise = (resolveValidationPromise, rejectValidationPromise) => {
@@ -313,7 +313,7 @@ export default class FormValidator {
         }
 
         this.updateDependencyRules()
-        this.logger.log("resetForm(): Form validation has been reset");
+        this._logger.log("resetForm(): Form validation has been reset");
     }
 
     resetForm() {
@@ -338,7 +338,7 @@ export default class FormValidator {
             })
         }
         
-        this.logger.log("resetForm(): Form has been reset");
+        this._logger.log("resetForm(): Form has been reset");
         this.events.onReset && (this.events.onReset(this));
 
     }
@@ -391,24 +391,24 @@ export default class FormValidator {
 
             if(storage.data) {
                 let serializedForm = storage.data;
-
-                Object.keys(serializedForm).forEach(key => {
-                    let value = serializedForm[key];
-                    let field = this.fields[key];
-                    if(field) {
-                        field.setValue(value)
-                        if(this.enableValidateAfterDataRestore && storage.validation && storage.validation[key] !== undefined) {
-                            let validation = storage.validation[key];
-                            if(validation.status === 1) { 
-                                field.setValid(validation.message)
-                            } else if(validation.status === 0) { 
-                                field.setInvalid(validation.message)
-                            } else {
-                                field.setUnvalidated()
-                            }
+                
+                this.eachField(field => {
+                    
+                    let value = "";
+                    if(serializedForm[field.name] !== undefined) {
+                        value = serializedForm[field.name];
+                    }
+                    field.setValue(value)
+                    if(this.enableValidateAfterDataRestore && storage.validation && storage.validation[field.name] !== undefined) {
+                        let validation = storage.validation[field.name];
+                        if(validation.status === 1) { 
+                            field.setValid(validation.message)
+                        } else if(validation.status === 0) { 
+                            field.setInvalid(validation.message)
+                        } else {
+                            field.setUnvalidated()
                         }
                     }
-                    
                 })
 
                 if(!this.enableValidateAfterDataRestore) {
@@ -431,16 +431,32 @@ export default class FormValidator {
         this.eachField(field => {
             field.disableInteraction()
         })
-        this.$form.style.opacity = "0.7"
-        this.logger.log("disableForm(): Form has been disabled");
+
+        if(this.formDisabledClass && this.formDisabledClass.length) {
+            this.$form.classList.add(this.formDisabledClass)
+        }
+        if(this.formEnabledClass && this.formEnabledClass.length) {
+            this.$form.classList.remove(this.formEnabledClass)
+        }
+
+        this._logger.log("disableForm(): Form has been disabled");
     }
     
     enableForm() {
         this.eachField(field => {
             field.enableInteraction()
         })
-        this.$form.style.opacity = "1"
-        this.logger.log("enableForm(): Form has been enabled");
+        
+        if(this.formDisabledClass && this.formDisabledClass.length) {
+            this.$form.classList.remove(this.formDisabledClass)
+        }
+
+        if(this.formEnabledClass && this.formEnabledClass.length) {
+            this.$form.classList.add(this.formEnabledClass)
+        }
+
+        this.$form.classList.add()
+        this._logger.log("enableForm(): Form has been enabled");
     }
 
     getDependencyRuleTargetFields(depRuleObject) {
@@ -460,7 +476,7 @@ export default class FormValidator {
 
     updateDependencyRules(resetValueOnToggle=false) {
 
-        this.logger.log("updateDependencyRules(): Updating...", this);   
+        this._logger.log("updateDependencyRules(): Updating...", this);   
 
         Object.keys(this.fields).forEach(k => {
 
@@ -602,7 +618,7 @@ export default class FormValidator {
 
             this.events.onBeforeSubmit && (this.events.onBeforeSubmit(this));
             
-            this.logger.log("submit(): Submitting form", this); 
+            this._logger.log("submit(): Submitting form", this); 
 
             this.showLoading();
 
@@ -618,7 +634,7 @@ export default class FormValidator {
                         this.resetForm();
                     } else {
                         this.submitting = false
-                        this.logger.log("submit(): Form can't be submitted", this); 
+                        this._logger.log("submit(): Form can't be submitted", this); 
                         this.events.onSubmitFail && (this.events.onSubmitFail(this));
                     }
                     this.enableForm();
