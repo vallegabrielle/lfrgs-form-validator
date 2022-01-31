@@ -14,6 +14,9 @@ const DEFAULT_OPTIONS = {
     validateFieldOnInput: false,
     validateFieldOnBlur: true,
 
+    formDisabledClass: "disabled",
+    formEnabledClass: "",
+
     groupWrapperHiddenClass: "d-none",
     groupWrapperVisibleClass: "d-block",
 
