@@ -41,10 +41,12 @@ class FormValidatorStepsHandler {
             }
 
             if(step.formValidatorInstance && step.formValidatorInstance.$form) {
-                $stepForm.addEventListener("change", handleStepFormChange)
+                $stepForm.addEventListener("change", handleStepFormChange);
 
-                step.formValidatorInstance.submitFn = (validator => {
-                    console.log('enviando o step ', validator)
+                let _this = this;
+                step.formValidatorInstance.submitFn = ((validator, cb) => {
+                    _this.next();
+                    cb(false)
                 })
             }
 
@@ -123,7 +125,6 @@ class FormValidatorStepsHandler {
             Promise.all(validatorsPromises).then(() => {
                 _setStep()
             }).catch(() => {
-                debugger;
                 if(this.steps[stepIndex].formValidatorInstance.isValid()) {
                     _setStep()
                 }

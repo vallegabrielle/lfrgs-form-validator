@@ -19,26 +19,11 @@ const removeUndefinedObjectKeys = (obj) => {
     return obj
 };
 
-Promise.series = function series(arrayOfPromises) {
-    var results = [];
-    return arrayOfPromises.reduce(function(seriesPromise, promise) {
-      return seriesPromise.then(function() {
-        return promise
-        .then(function(result) {
-          results.push(result);
-        });
-      });
-    }, Promise.resolve())
-    .then(function() {
-      return results;
-    });
-};
-
 export default class FormValidatorField {
 
     constructor(fieldObject, debug=false) {
 
-        this.logger = new Logger(debug);
+        this._logger = new Logger(debug);
 
         if(!fieldObject._validator.$form.querySelectorAll('[name="'+fieldObject.name+'"]').length) {
             return;
@@ -239,7 +224,7 @@ export default class FormValidatorField {
             return this.getValueFn(this)
         } else {
     
-            if(this.elements.length > 1) { // radio or checkbox
+            if(this.elements.length > 1) {
                 let value = [];
                 if(this.elements[0].getAttribute("type") === "radio" || this.elements[0].getAttribute("type") === "checkbox") {
                     this.elements.forEach($field => {
@@ -250,7 +235,11 @@ export default class FormValidatorField {
                 }
                 return value
             } else {
-                return this.elements[0].value
+                if(this.elements[0].getAttribute("type") === "radio" || this.elements[0].getAttribute("type") === "checkbox") {
+                    return (this.elements[0].checked)?this.elements[0].value:''
+                } else {
+                    return this.elements[0].value
+                }
             }
         }
         
@@ -432,6 +421,7 @@ export default class FormValidatorField {
                     
                 })
             }
+
             if(fieldRenderPreferences["addWrapper"+capitalizedStatusName+"Class"]) {
                 this.$wrapper.classList.add(fieldRenderPreferences["wrapper"+capitalizedStatusName+"Class"]);
             }
@@ -515,7 +505,7 @@ export default class FormValidatorField {
 
 
         if(this._status === -1) {
-            this.logger.logWarning("validate(): Field \"#"+this.name+"\" is still being validated");
+            this._logger.logWarning("validate(): Field \"#"+this.name+"\" is still being validated");
             return new Promise((resolve, reject) => {
                 this.setValidating(validatingMessage, silentMode);
                 reject()
@@ -524,7 +514,7 @@ export default class FormValidatorField {
 
         if(this._status === 1 || this._status === 0) {
             let status = this._status;
-            this.logger.logWarning("validate(): Field \"#"+this.name+"\" hasn't changed since last validation");
+            this._logger.logWarning("validate(): Field \"#"+this.name+"\" hasn't changed since last validation");
             return new Promise((resolve, reject) => {
                 if(status === 1) {
                     this.setValid(validMessage, silentMode);
@@ -542,7 +532,7 @@ export default class FormValidatorField {
             })
         }
 
-        this.logger.log("validate(): Field \"#"+this.name+"\" will be validated", this);
+        this._logger.log("validate(): Field \"#"+this.name+"\" will be validated", this);
 
         var events = this.getEvents();
 
@@ -570,7 +560,7 @@ export default class FormValidatorField {
                 await runRuleTest(rule, value).then(() => {}).catch((message) => {
                     
                     isValid = false;
-                    this.logger.log("validate(): Field \"#"+this.name+"\" is not valid", this);
+                    this._logger.log("validate(): Field \"#"+this.name+"\" is not valid", this);
                     this.setInvalid(message, silentMode);
                     rejectValidationPromise();
                     
@@ -583,7 +573,7 @@ export default class FormValidatorField {
             }
 
             if(isValid) {
-                this.logger.log("validate(): Field \"#"+this.name+"\" is valid", this);
+                this._logger.log("validate(): Field \"#"+this.name+"\" is valid", this);
                 this.setValid(validMessage, silentMode);
                 resolveValidationPromise();
                 
