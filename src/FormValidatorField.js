@@ -157,7 +157,6 @@ export default class FormValidatorField {
 
             }
 
-            $field.addEventListener('input', handleFieldInput);        
 
             let eventName = 'blur';
             if($field.getAttribute("type") === "radio" || $field.getAttribute("type") === "checkbox") {
@@ -166,34 +165,44 @@ export default class FormValidatorField {
 
             var timeout;
             let handleFieldValidationOnBlur = () => {
-
                 if(this.getValidateFieldOnBlur() && this.interactive) {
-
-                    if(eventName === 'change') {
-                        this.setUnvalidated();
-                        $field.focus()
+                    let validate = () => {
+                        this._validate().then((message) => {
+                        }).catch((message) => {
+                        })
                     }
+                    clearTimeout(timeout);
+                    timeout = setTimeout(validate, 1)
+                }
+            }
+
+            var timeout;
+            let handleFieldValidationOnChange = () => {
+                if(this.getValidateFieldOnBlur() && this.interactive) {
+                    this.setUnvalidated();
+
                     let validate = () => {
                         this._validate().then((message) => {
                         }).catch((message) => {
                         }).finally(() => {
-                            if(eventName === 'change') {
-                                $field.focus()
-                            }
+                            $field.focus()
                         })
                     }
-
                     clearTimeout(timeout);
                     timeout = setTimeout(validate, 1)
-
                 }
             }
 
-            $field.addEventListener(eventName, handleFieldValidationOnBlur)
+            $field.addEventListener('input', handleFieldInput);        
+            $field.addEventListener('blur', handleFieldValidationOnBlur)
+            $field.addEventListener('change', handleFieldValidationOnChange)
+
 
             unregisterFns.push(() => {
                 $field.removeEventListener('input', handleFieldInput);
-                $field.removeEventListener(eventName, handleFieldValidationOnBlur);
+                $field.removeEventListener('blur', handleFieldValidationOnBlur);
+                $field.removeEventListener('change', handleFieldValidationOnChange);
+
                 $field.removeAttribute(constants.INITIALIZED_FIELD_DATA_ATTRIBUTE);
             })
 
