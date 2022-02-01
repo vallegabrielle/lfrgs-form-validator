@@ -123,7 +123,7 @@ export default class FormValidatorField {
             this.$wrapper = undefined
         }
         
-        let events = this.getEvents()
+        let events = this.getEvents();
         this.elements.forEach($field => {
 
             $field.setAttribute(constants.INITIALIZED_FIELD_DATA_ATTRIBUTE, "true");
@@ -180,6 +180,9 @@ export default class FormValidatorField {
             let handleFieldValidationOnChange = () => {
                 if(this.getValidateFieldOnBlur() && this.interactive) {
                     this.setUnvalidated();
+                    if($field.getAttribute("type") === "radio" || $field.getAttribute("type") === "checkbox") {
+                        $field.focus()
+                    }
 
                     let validate = () => {
                         this._validate().then((message) => {
@@ -194,14 +197,14 @@ export default class FormValidatorField {
             }
 
             $field.addEventListener('input', handleFieldInput);        
-            $field.addEventListener('blur', handleFieldValidationOnBlur)
             $field.addEventListener('change', handleFieldValidationOnChange)
+            $field.addEventListener('blur', handleFieldValidationOnBlur)
 
 
             unregisterFns.push(() => {
                 $field.removeEventListener('input', handleFieldInput);
-                $field.removeEventListener('blur', handleFieldValidationOnBlur);
                 $field.removeEventListener('change', handleFieldValidationOnChange);
+                $field.removeEventListener('blur', handleFieldValidationOnBlur);
 
                 $field.removeAttribute(constants.INITIALIZED_FIELD_DATA_ATTRIBUTE);
             })

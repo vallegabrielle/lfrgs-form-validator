@@ -34,19 +34,20 @@ export default class FormValidator {
                 }
                 DEFAULT_RULES[rule.name] = rule;
             }
-            
+        
         })
 
     }
     
-    constructor(formId, options={}) {
+    constructor(formId, options={}, commonOptions={}) {
             
         this._logger = new Logger(options.debug);
 
         this._logger.log("constructor(): New validator instance");
         this.formId = formId;
 
-        this.options = deepSpread(options, DEFAULT_OPTIONS);
+        let _options = deepSpread(commonOptions, DEFAULT_OPTIONS);
+        this.options = deepSpread(options, _options);
         
         if(!document.getElementById(formId)) {
             this._logger.logError("constructor(): Couldn't find form element \"#"+formId+"\"");
