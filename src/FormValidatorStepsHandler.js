@@ -17,7 +17,12 @@ class FormValidatorStepsHandler {
         this.steps = options.steps;
         this.currentStepIndex = undefined;
         this.onUpdate = options.onUpdate;
+        this.onInit = options.onInit;
         this.enableStrictStepsOrder = options.enableStrictStepsOrder;
+        this.submitFn = options.submitFn;
+        this.onSubmit = options.onSubmit
+        this.onSubmitFail = options.onSubmitFail;
+        this.isSubmitting = false;
 
         return this.init()
     }
@@ -45,16 +50,43 @@ class FormValidatorStepsHandler {
 
                 let _this = this;
                 step.formValidatorInstance.submitFn = ((validator, cb) => {
-                    _this.next();
+                    _this.submit();
                     cb(false)
                 })
             }
+
+            let stepPreviousButtons = $stepForm.querySelectorAll('[data-steps-handler-previous]');
+            let stepNextButtons = $stepForm.querySelectorAll('[data-steps-handler-next]');
+            let submitButtons = $stepForm.querySelectorAll('[data-steps-handler-submit]');
+
+            stepPreviousButtons.forEach($previousButton => {
+                $previousButton.addEventListener('click', e => {
+                    e.preventDefault();
+                    this.previous()
+                })
+            })
+
+            stepNextButtons.forEach($nextButton => {
+                $nextButton.addEventListener('click', e => {
+                    e.preventDefault();
+                    this.next()
+                })
+            })
+
+            submitButtons.forEach($submitButton => {
+                $submitButton.addEventListener('click', e => {
+                    e.preventDefault();
+                    this.submit()
+                })
+            })
 
         }
 
         this.start(); // TODO: if config says it auto starts
 
         this.update();
+
+        (this.onInit) && this.onInit();
 
         return this
         
@@ -92,7 +124,7 @@ class FormValidatorStepsHandler {
             };
             
         }
-
+        
         (this.onUpdate) && this.onUpdate();
         
     }
@@ -115,19 +147,20 @@ class FormValidatorStepsHandler {
         }
         
         if(this.enableStrictStepsOrder) {
-
+            
             let validatorsPromises = [];
             for(let i = stepIndex-1; i>=0; i--) {
-                validatorsPromises.push(this.steps[i].formValidatorInstance._validate());
+                if(this.steps[i]) {
+                    validatorsPromises.push(this.steps[i].formValidatorInstance._validate());
+                }
             }
-
 
             Promise.all(validatorsPromises).then(() => {
                 _setStep()
             }).catch(() => {
-                if(this.steps[stepIndex].formValidatorInstance.isValid()) {
-                    _setStep()
-                }
+                // if(this.steps[stepIndex].formValidatorInstance.isValid()) {
+                //     _setStep()
+                // }
             })
 
             
@@ -139,16 +172,18 @@ class FormValidatorStepsHandler {
 
     next() {
         this.steps[this.currentStepIndex].formValidatorInstance._validate().then(() => {
-            this.setStep(this.currentStepIndex + 1);
-        }).catch(() => {})
+            if(this.currentStepIndex === this.steps.length-1) {
+                this.submit()
+            } else {
+                this.setStep(this.currentStepIndex + 1);
+            }
+        }).catch(() => {
+            // this.submit()
+        })
     }
 
     previous() {
         this.setStep(this.currentStepIndex - 1);
-    }
-
-    forEachStep(fn, i) {
-        
     }
 
     reset() {
@@ -156,12 +191,55 @@ class FormValidatorStepsHandler {
             let step = this.steps[i];
             step.formValidatorInstance.resetForm();
         }
+        this.start();
+    }
+
+    start() {
         this.setStep(0);
     }
 
 
-    start() {
-        this.setStep(0);
+    submit() {
+
+        if(this.isSubmitting) {
+            return;
+        }
+        
+        let firstInvalidStepIndex = -1;
+        for(let i = 0; i < this.steps.length; i++) {
+            let step = this.steps[i];
+            if(!step.formValidatorInstance.isValid()) {
+                firstInvalidStepIndex = i;
+                break;
+            }
+        }
+        if(firstInvalidStepIndex !== -1) {
+            this.setStep(firstInvalidStepIndex);
+            this.steps[firstInvalidStepIndex].formValidatorInstance.submit()
+        } else {
+            this.setStep(this.steps.length-1);
+
+            let submitCallback = (result) => {
+                this.isSubmitting = false;
+                if(result) {
+                    (this.onSubmit) && this.onSubmit();
+                    // this.reset();
+                } else {
+                    (this.onSubmitFail) && this.onSubmitFail();
+                }
+            }
+            this.isSubmitting = true;
+
+            let forms = this.steps.map((step) => { 
+                return step.formValidatorInstance.$form
+            });
+
+            (this.submitFn) && this.submitFn(forms, submitCallback);
+
+        }
+        
+        
+
     }
 
 

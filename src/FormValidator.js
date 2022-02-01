@@ -6,6 +6,8 @@ import Logger from './Logger';
 import { deepSpread } from 'deep-spread';
 
 var DEFAULT_RULES = defaultRules;
+var DEFAULT_OPTIONS = constants.DEFAULT_OPTIONS;
+
 
 const removeUndefinedObjectKeys = (obj) => {
     Object.keys(obj).forEach(key => {
@@ -19,7 +21,7 @@ const removeUndefinedObjectKeys = (obj) => {
 export default class FormValidator {
 
     static setDefaultOptions(options) {
-        constants.DEFAULT_OPTIONS = deepSpread(options, constants.DEFAULT_OPTIONS);
+        DEFAULT_OPTIONS = deepSpread(options, DEFAULT_OPTIONS);
     }
 
     static setDefaultRules(rules) {
@@ -44,7 +46,7 @@ export default class FormValidator {
         this._logger.log("constructor(): New validator instance");
         this.formId = formId;
 
-        this.options = deepSpread(options, constants.DEFAULT_OPTIONS);
+        this.options = deepSpread(options, DEFAULT_OPTIONS);
         
         if(!document.getElementById(formId)) {
             this._logger.logError("constructor(): Couldn't find form element \"#"+formId+"\"");
@@ -553,10 +555,24 @@ export default class FormValidator {
                     }
 
                     
-                    if(DEFAULT_RULES[depRuleObject.name]) {
-                        depRuleObject = {...DEFAULT_RULES[depRuleObject.name], ...removeUndefinedObjectKeys(depRuleObject)}
+                    if(depRuleObject.name) {
+                        if(depRuleObject.name === "isValid") {
+                            let _field = field;
+                            depRuleObject.fn = (value) => {
+                                return _field.isValid()
+                            }
+                        } else if(depRuleObject.name === "isInvalid") {
+                            let _field = field;
+                            depRuleObject.fn = (value) => {
+                                return !_field.isValid()
+                            }
+                        } else {
+                            if(DEFAULT_RULES[depRuleObject.name]) {
+                                depRuleObject = {...DEFAULT_RULES[depRuleObject.name], ...removeUndefinedObjectKeys(depRuleObject)}
+                            }
+                        }
                     }
-
+                    
 
                     var rule = new FormValidatorRule(depRuleObject)
 
