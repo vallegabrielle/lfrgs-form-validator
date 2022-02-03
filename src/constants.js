@@ -13,6 +13,7 @@ const DEFAULT_OPTIONS = {
     resetFieldValidationOnChange: true,
     validateFieldOnInput: false,
     validateFieldOnBlur: true,
+    validateFieldOnChange: false, // may be used for mocked elements (that use hidden fields)
 
     formDisabledClass: "disabled",
     formEnabledClass: "",
