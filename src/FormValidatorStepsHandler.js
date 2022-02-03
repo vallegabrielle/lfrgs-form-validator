@@ -158,9 +158,7 @@ class FormValidatorStepsHandler {
             Promise.all(validatorsPromises).then(() => {
                 _setStep()
             }).catch(() => {
-                // if(this.steps[stepIndex].formValidatorInstance.isValid()) {
-                //     _setStep()
-                // }
+                this.steps[this.currentStepIndex].formValidatorInstance.submit()
             })
 
             
@@ -178,7 +176,7 @@ class FormValidatorStepsHandler {
                 this.setStep(this.currentStepIndex + 1);
             }
         }).catch(() => {
-            // this.submit()
+            this.submit()
         })
     }
 
