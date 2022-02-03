@@ -46,6 +46,7 @@ export default class FormValidatorField {
         this.resetFieldValidationOnChange = fieldObject.resetFieldValidationOnChange;
         this.validateFieldOnInput = fieldObject.validateFieldOnInput;
         this.validateFieldOnBlur = fieldObject.validateFieldOnBlur;
+        this.validateFieldOnChange = fieldObject.validateFieldOnChange;
         this.getValueFn = fieldObject.getValueFn;
         this.setValueFn = fieldObject.setValueFn;
 
@@ -85,6 +86,13 @@ export default class FormValidatorField {
         }
     }
 
+    getValidateFieldOnChange() {
+        if(this.validateFieldOnChange === undefined) {
+            return this._validator.validateFieldOnChange
+        } else {
+            return this.validateFieldOnChange
+        }
+    }
     getResetFieldValidationOnChange() {
         if(this.resetFieldValidationOnChange === undefined) {
             return this._validator.resetFieldValidationOnChange
@@ -173,17 +181,13 @@ export default class FormValidatorField {
                     }
                     clearTimeout(timeout);
                     timeout = setTimeout(validate, 1)
+                    validate()
                 }
             }
 
             var timeout;
             let handleFieldValidationOnChange = () => {
-                if(this.getValidateFieldOnBlur() && this.interactive) {
-                    this.setUnvalidated();
-                    if($field.getAttribute("type") === "radio" || $field.getAttribute("type") === "checkbox") {
-                        $field.focus()
-                    }
-
+                if(this.getValidateFieldOnChange() && this.interactive) {
                     let validate = () => {
                         this._validate().then((message) => {
                         }).catch((message) => {
@@ -450,7 +454,8 @@ export default class FormValidatorField {
 
     }
 
-    // Set visual states
+
+    // Set states
     setUnvalidated(message, silentMode) {
 
         if(!message || !message.length) {
@@ -556,7 +561,7 @@ export default class FormValidatorField {
             
             var value = this.getValue()
             var rules = this.getRules();
-  
+
             var isValid = true;
 
             function runRuleTest(rule, value) {
@@ -594,8 +599,6 @@ export default class FormValidatorField {
                 this._validator.updateFormState()
 
             }
-
-
 
         }
 

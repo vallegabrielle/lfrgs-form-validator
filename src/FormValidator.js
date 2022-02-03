@@ -79,8 +79,9 @@ export default class FormValidator {
         this.fieldRenderPreferences = this.options.fieldRenderPreferences;
 
         this.events = this.options.events;
-        this.validateFieldOnBlur = this.options.validateFieldOnBlur;
         this.validateFieldOnInput = this.options.validateFieldOnInput;
+        this.validateFieldOnBlur = this.options.validateFieldOnBlur;
+        this.validateFieldOnChange = this.options.validateFieldOnChange;
         this.resetFieldValidationOnChange = this.options.resetFieldValidationOnChange;
         this.submitFn = this.options.submitFn;
         this.showLoadingFn = this.options.showLoadingFn;
