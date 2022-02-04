@@ -187,7 +187,7 @@ export default class FormValidatorField {
 
             var timeout;
             let handleFieldValidationOnChange = () => {
-                if(this.getValidateFieldOnChange() && this.interactive) {
+                if((this.getValidateFieldOnChange() || eventName === "change") && this.interactive) {
                     let validate = () => {
                         this._validate().then((message) => {
                         }).catch((message) => {
