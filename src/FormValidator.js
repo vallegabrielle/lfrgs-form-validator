@@ -74,6 +74,7 @@ export default class FormValidator {
     init() {
         this._logger.log("init(): Initializing validator...");   
 
+        this.initialized = false;
         this.$form = document.getElementById(this.formId);
         
         this.fieldRenderPreferences = this.options.fieldRenderPreferences;
@@ -153,7 +154,10 @@ export default class FormValidator {
             this.$form.removeEventListener('submit', handleFormSubmit)
             this.$form.removeEventListener('change', handleFormChange)
 
+            this.initialized = false;
         }
+
+        this.initialized = true;
 
     }
     
@@ -203,13 +207,13 @@ export default class FormValidator {
 
         if(!fieldsNames.length) {
             this.eachField((field) => {
-                if(field._status !== 1) {
+                if(field && !field.isValid()) {
                     hasInvalidField = true;
                 }
             }) 
         } else {
             fieldsNames.forEach(fieldName => {
-                if(this.fields[fieldName]._status !== 1) {
+                if(this.fields[fieldName] && !this.fields[fieldName].isValid()) {
                     hasInvalidField = true;
                 }
             })
@@ -255,6 +259,24 @@ export default class FormValidator {
             }
         })
         return fields
+    }
+
+
+    getFieldsByWrapperElement($wrapperElement) {
+        var _this = this;
+        let formElements = $wrapperElement.querySelectorAll("input,textarea,button,select");
+        let fields = []; 
+        
+        Array.from(formElements).map(function($formElement) {
+            let formElementName = $formElement.hasAttribute("name") ? $formElement.getAttribute("name") : undefined;
+            if(formElementName && _this.fields[formElementName]) {
+                fields.push(_this.fields[formElementName])
+            }
+        })
+        
+
+        return fields
+
     }
 
 
@@ -672,8 +694,11 @@ export default class FormValidator {
         // Process
         this.events.onTrySubmit && (this.events.onTrySubmit(this));
 
-        if(this.getFirstInvalidField()) {
-            this.getFirstInvalidField().elements[0].focus()
+        let firstInvalidField = this.getFirstInvalidField();
+
+        if(firstInvalidField) {
+            firstInvalidField.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: firstInvalidField}}))
+            firstInvalidField.elements[0].focus();
         }
 
         
@@ -689,9 +714,12 @@ export default class FormValidator {
                     this.submitting = false
                 }
             }).catch(() => {
-                this.submitting = false
-                if(this.getFirstInvalidField()) {
-                    this.getFirstInvalidField().elements[0].focus()
+                this.submitting = false;
+                let firstInvalidField = this.getFirstInvalidField();
+
+                if(firstInvalidField) {
+                    firstInvalidField.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: firstInvalidField}}))
+                    firstInvalidField.elements[0].focus();
                 }
             })
         

@@ -86,7 +86,7 @@ class FormValidatorStepsHandler {
 
         this.update();
 
-        (this.onInit) && this.onInit();
+        (this.onInit) && this.onInit(this);
 
         return this
         
@@ -125,7 +125,7 @@ class FormValidatorStepsHandler {
             
         }
         
-        (this.onUpdate) && this.onUpdate();
+        (this.onUpdate) && this.onUpdate(this);
         
     }
 
@@ -143,6 +143,7 @@ class FormValidatorStepsHandler {
             
             this.steps[stepIndex].formValidatorInstance.$form.classList.remove('d-none');
             this.currentStepIndex = stepIndex;
+            this.steps[stepIndex].formValidatorInstance.$form.dispatchEvent(new CustomEvent('formValidatorShowStep', {detail: {currentStep: stepIndex}}))
             this.update()
         }
         
@@ -220,10 +221,10 @@ class FormValidatorStepsHandler {
             let submitCallback = (result) => {
                 this.isSubmitting = false;
                 if(result) {
-                    (this.onSubmit) && this.onSubmit();
+                    (this.onSubmit) && this.onSubmit(this);
                     // this.reset();
                 } else {
-                    (this.onSubmitFail) && this.onSubmitFail();
+                    (this.onSubmitFail) && this.onSubmitFail(this);
                 }
             }
             this.isSubmitting = true;
@@ -232,7 +233,7 @@ class FormValidatorStepsHandler {
                 return step.formValidatorInstance.$form
             });
 
-            (this.submitFn) && this.submitFn(forms, submitCallback);
+            (this.submitFn) && this.submitFn(forms, submitCallback, this);
 
         }
         

@@ -140,21 +140,38 @@ export default class FormValidatorField {
                 $field.setAttribute("data-originally-readonly", "")
             }
 
+            let isRadioOrCheckbox = false;
+            if($field.getAttribute("type") === "radio" || $field.getAttribute("type") === "checkbox") {
+                isRadioOrCheckbox = true;
+            }
+
+            let isSelect = false;
+            if($field.tagName.toLowerCase() === "select") {
+                isSelect = true;
+            }
+
+            let isTypeHidden = false;
+            if($field.hasAttribute("type") && $field.getAttribute("type") === "hidden") {
+                isTypeHidden = true;
+            }
+
             let handleFieldInput = (e) => {
 
                 this.status = undefined;
                 this._status = undefined;
 
-                if(this.getResetFieldValidationOnChange()) {
+                if(this.getResetFieldValidationOnChange() || (isSelect && this.getValidateFieldOnBlur())) {
                     this.setUnvalidated();
-                    $field.focus()
+                    this.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: this}}))
+                    $field.focus();
                 }
             
-                if(this.getValidateFieldOnInput()) {
+                if(this.getValidateFieldOnInput() || (isSelect && this.getValidateFieldOnBlur())) {
                     let validate = () => {
                         this._validate().then((message) => {
                         }).catch((message) => {
                         }).finally(() => {
+                            this.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: this}}))
                             $field.focus()
                         })
                     }
@@ -166,10 +183,6 @@ export default class FormValidatorField {
             }
 
 
-            let eventName = 'blur';
-            if($field.getAttribute("type") === "radio" || $field.getAttribute("type") === "checkbox") {
-                eventName = 'change'
-            }
 
             var timeout;
             let handleFieldValidationOnBlur = () => {
@@ -187,11 +200,12 @@ export default class FormValidatorField {
 
             var timeout;
             let handleFieldValidationOnChange = () => {
-                if((this.getValidateFieldOnChange() || eventName === "change") && this.interactive) {
+                if((this.getValidateFieldOnChange() || isRadioOrCheckbox) && this.interactive) {
                     let validate = () => {
                         this._validate().then((message) => {
                         }).catch((message) => {
                         }).finally(() => {
+                            this.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: this}}))
                             $field.focus()
                         })
                     }
@@ -313,8 +327,11 @@ export default class FormValidatorField {
         }
                 
     }
-
     
+    isValid() {
+        return (!this.useRules || (this._status !== undefined && (this._status) === 1))
+    }
+
     disableRules() {
         this.useRules = false;
     }
@@ -500,10 +517,6 @@ export default class FormValidatorField {
         })
         this.validationElements = [];
     }
-    
-    isValid() {
-        return this._status === 1
-    }
 
 
     validate(cb=()=>{}) {
@@ -519,7 +532,11 @@ export default class FormValidatorField {
         let validatingMessage = fieldRenderPreferences.validatingMessage;
         let validMessage = fieldRenderPreferences.validMessage;
 
-
+        if(!this.useRules || !this.interactive) {
+            return new Promise((resolve, reject) => {
+                resolve()
+            })
+        }
 
         if(this._status === -1) {
             this._logger.logWarning("validate(): Field \"#"+this.name+"\" is still being validated");
@@ -543,11 +560,6 @@ export default class FormValidatorField {
             })
         }
 
-        if(!this.useRules && !this.interactive) {
-            return new Promise((resolve, reject) => {
-                resolve()
-            })
-        }
 
         this._logger.log("validate(): Field \"#"+this.name+"\" will be validated", this);
 
@@ -599,6 +611,9 @@ export default class FormValidatorField {
                 this._validator.updateFormState()
 
             }
+
+            this.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldValidate', {detail: {formValidatorField: this}}))
+            
 
         }
 
