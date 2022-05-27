@@ -29,10 +29,6 @@ class FormValidatorStepsHandler {
 
     init() {
 
-        if(this.steps.length <= 1) { // Duh!
-            return;
-        }
-
         for(let i = 0; i < this.steps.length; i++) {
             let step = this.steps[i];
             let $stepForm = step.formValidatorInstance.$form;
