@@ -25,6 +25,9 @@ const DEFAULT_OPTIONS = {
         wrapperClass: "form-group",
         wrapperHiddenClass: "d-none",
         wrapperVisibleClass: "d-block",
+        wrapperDisabledClass: "disabled",
+        
+        disabledClass: "disabled",
         
         // "Unvalidated" field state 
         showUnvalidatedMessage: false,
