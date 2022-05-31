@@ -23,6 +23,8 @@ class FormValidatorStepsHandler {
         this.onSubmit = options.onSubmit
         this.onSubmitFail = options.onSubmitFail;
         this.isSubmitting = false;
+        this.currentStepClass = "d-block"; // TODO: deixar configurável  
+        this.hiddenStepClass = "d-none" // TODO: deixar configurável  
 
         return this.init()
     }
