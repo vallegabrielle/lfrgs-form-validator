@@ -8,6 +8,7 @@ import email from './defaultRules/email';
 import equal from './defaultRules/equal';
 import hasValues from './defaultRules/hasValues';
 import cpf from './defaultRules/cpf';
+import cep from './defaultRules/cep';
 import date from './defaultRules/date';
 import phone from './defaultRules/phone';
 
@@ -20,6 +21,7 @@ export default {
   equal,
   hasValues,
   cpf,
+  cep,
   date,
   phone,
   length
