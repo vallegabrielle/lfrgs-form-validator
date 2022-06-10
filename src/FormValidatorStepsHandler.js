@@ -1,15 +1,3 @@
-// Each step is a form
-// option: allowGoingBack
-// option: onlyAllowForwardingWhenStepIsValid
-// option autoStartOnFirstStep
-// fazer metodos avançar e voltar
-// cada passo tera uma classe pra dizer que o step está ativo/inativo, se é o proximo ou o anterior, se é o primeiro ou o último e idenficar o numero via html mesmo
-// Cada passo tb terá classe pra dizer se a step ta ativa ou inativa
-// eventos onStepActivate / inactivate
-
-
-/// Will suppress each validator's submit method???? 
-
 class FormValidatorStepsHandler {
 
     constructor(options) {
@@ -23,8 +11,8 @@ class FormValidatorStepsHandler {
         this.onSubmit = options.onSubmit
         this.onSubmitFail = options.onSubmitFail;
         this.isSubmitting = false;
-        this.currentStepClass = "d-block"; // TODO: deixar configurável  
-        this.hiddenStepClass = "d-none" // TODO: deixar configurável  
+        this.currentStepClass = options.currentStepClass || "d-block"; // TODO: deixar configurável  
+        this.hiddenStepClass = options.hiddenStepClass || "d-none" // TODO: deixar configurável  
 
         return this.init()
     }
@@ -128,7 +116,7 @@ class FormValidatorStepsHandler {
     }
 
     setStep(stepIndex) {
-
+        
         if(stepIndex < 0 || stepIndex >= this.steps.length || !this.steps[stepIndex]) {
             return;
         }
@@ -143,6 +131,7 @@ class FormValidatorStepsHandler {
             this.currentStepIndex = stepIndex;
             this.steps[stepIndex].formValidatorInstance.$form.dispatchEvent(new CustomEvent('formValidatorShowStep', {detail: {currentStep: stepIndex}}))
             this.update()
+            return
         }
         
         if(this.enableStrictStepsOrder) {
@@ -165,6 +154,8 @@ class FormValidatorStepsHandler {
             _setStep()
         }
 
+        return;
+
     }
 
     next() {
@@ -177,6 +168,8 @@ class FormValidatorStepsHandler {
         }).catch(() => {
             this.submit()
         })
+
+        return;
     }
 
     previous() {
@@ -210,28 +203,31 @@ class FormValidatorStepsHandler {
                 break;
             }
         }
+
         if(firstInvalidStepIndex !== -1) {
             this.setStep(firstInvalidStepIndex);
-            this.steps[firstInvalidStepIndex].formValidatorInstance.submit()
+            this.steps[firstInvalidStepIndex].formValidatorInstance.validate()
         } else {
-            this.setStep(this.steps.length-1);
-
+            
+            let _this = this;
             let submitCallback = (result) => {
-                this.isSubmitting = false;
+
+                _this.isSubmitting = false;
                 if(result) {
-                    (this.onSubmit) && this.onSubmit(this);
-                    // this.reset();
+                    _this.onSubmit(_this);
+                    // _this.reset();
                 } else {
-                    (this.onSubmitFail) && this.onSubmitFail(this);
+                    _this.onSubmitFail(_this);
                 }
             }
             this.isSubmitting = true;
 
-            let forms = this.steps.map((step) => { 
-                return step.formValidatorInstance.$form
-            });
+            
+            // let forms = this.steps.map((step) => { 
+            //     return step.formValidatorInstance.$form
+            // });
 
-            (this.submitFn) && this.submitFn(forms, submitCallback, this);
+            (this.submitFn) && this.submitFn(this, submitCallback);
 
         }
         
