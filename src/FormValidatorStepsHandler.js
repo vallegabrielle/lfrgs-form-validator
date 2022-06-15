@@ -13,6 +13,8 @@ class FormValidatorStepsHandler {
         this.isSubmitting = false;
         this.currentStepClass = options.currentStepClass || "d-block"; // TODO: deixar configurável  
         this.hiddenStepClass = options.hiddenStepClass || "d-none" // TODO: deixar configurável  
+        // this.onBeforeSetStep = options.onSetStep
+        // this.onSetStep = options.onSetStep
 
         return this.init()
     }
@@ -124,13 +126,16 @@ class FormValidatorStepsHandler {
         let _setStep = () => {
             for(let i = 0; i < this.steps.length; i++) {
                 let step = this.steps[i];
-                step.formValidatorInstance.$form.classList.add('d-none');
+                step.formValidatorInstance.$form.classList.remove(this.currentStepClass);
+                step.formValidatorInstance.$form.classList.add(this.hiddenStepClass);
             }
             
-            this.steps[stepIndex].formValidatorInstance.$form.classList.remove('d-none');
+            this.steps[stepIndex].formValidatorInstance.$form.classList.remove(this.hiddenStepClass);
+            this.steps[stepIndex].formValidatorInstance.$form.classList.add(this.currentStepClass);
+
             this.currentStepIndex = stepIndex;
-            this.steps[stepIndex].formValidatorInstance.$form.dispatchEvent(new CustomEvent('formValidatorShowStep', {detail: {currentStep: stepIndex}}))
             this.update()
+            this.steps[stepIndex].formValidatorInstance.$form.dispatchEvent(new CustomEvent('formValidatorShowStep', {detail: {currentStep: stepIndex}}))
             return
         }
         
@@ -160,9 +165,7 @@ class FormValidatorStepsHandler {
 
     next() {
         this.steps[this.currentStepIndex].formValidatorInstance._validate().then(() => {
-            if(this.currentStepIndex === this.steps.length-1) {
-                this.submit()
-            } else {
+            if(this.currentStepIndex < this.steps.length-1) {
                 this.setStep(this.currentStepIndex + 1);
             }
         }).catch(() => {

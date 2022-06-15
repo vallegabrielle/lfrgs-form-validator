@@ -519,6 +519,10 @@ export default class FormValidator {
                         depRuleObject.groups = [];
                     }
 
+                    if(!depRuleObject.behavior || !depRuleObject.behavior.length) {
+                        depRuleObject.behavior = "hide"
+                    }
+
                     let targetFields = this.getDependencyRuleTargetFields(depRuleObject)
 
                     let hide = () => {
@@ -526,17 +530,26 @@ export default class FormValidator {
                             depRuleObject.groups.forEach(groupName => {
                                 let $groupWrapper = this.getGroupWrapper(groupName);
                                 if($groupWrapper) {
-                                    $groupWrapper.classList.add(this.groupWrapperHiddenClass);
-                                    $groupWrapper.classList.remove(this.groupWrapperVisibleClass);
+                                    if(depRuleObject.behavior === "hide") {
+                                        $groupWrapper.classList.add(this.groupWrapperHiddenClass);
+                                        $groupWrapper.classList.remove(this.groupWrapperVisibleClass);
+                                    }
                                 }
                             })
                             
                             targetFields.forEach(targetField => {
                                 let renderPrefs = targetField.getFieldRenderPreferences();
                                 if(!Array.from(targetField.$wrapper.classList).includes(renderPrefs.wrapperHiddenClass)) {
+                                    
+                                    if(depRuleObject.behavior === "hide") {
+                                        targetField.$wrapper.classList.add(renderPrefs.wrapperHiddenClass);
+                                        targetField.$wrapper.classList.remove(renderPrefs.wrapperVisibleClass);
+                                    }
 
-                                    targetField.$wrapper.classList.add(renderPrefs.wrapperHiddenClass);
-                                    targetField.$wrapper.classList.remove(renderPrefs.wrapperVisibleClass);
+                                    if(depRuleObject.behavior === "disable") {
+                                        targetField.disable()
+                                    }
+                                
                                     targetField.disableRules()
                                     targetField.status = 1;
                                     targetField._status = 1;
@@ -554,8 +567,10 @@ export default class FormValidator {
                             depRuleObject.groups.forEach(groupName => {
                                 let $groupWrapper = this.getGroupWrapper(groupName);
                                 if($groupWrapper) {
-                                    $groupWrapper.classList.remove(this.groupWrapperHiddenClass)
-                                    $groupWrapper.classList.add(this.groupWrapperVisibleClass)
+                                    if(depRuleObject.behavior === "hide") {
+                                        $groupWrapper.classList.remove(this.groupWrapperHiddenClass)
+                                        $groupWrapper.classList.add(this.groupWrapperVisibleClass)
+                                    }
                                 }
                             })
     
@@ -564,8 +579,15 @@ export default class FormValidator {
 
                                 if(Array.from(targetField.$wrapper.classList).includes(renderPrefs.wrapperHiddenClass)) {
 
-                                    targetField.$wrapper.classList.remove(renderPrefs.wrapperHiddenClass)
-                                    targetField.$wrapper.classList.add(renderPrefs.wrapperVisibleClass)
+                                    if(depRuleObject.behavior === "hide") {
+                                        targetField.$wrapper.classList.remove(renderPrefs.wrapperHiddenClass)
+                                        targetField.$wrapper.classList.add(renderPrefs.wrapperVisibleClass)
+                                    } 
+                                    
+                                    if(depRuleObject.behavior === "disable") {
+                                        targetField.enable()
+                                    }
+
                                     targetField.enableRules()
                                     targetField.status = undefined
                                     targetField._status = undefined
