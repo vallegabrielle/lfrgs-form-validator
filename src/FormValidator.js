@@ -539,24 +539,22 @@ export default class FormValidator {
                             
                             targetFields.forEach(targetField => {
                                 let renderPrefs = targetField.getFieldRenderPreferences();
-                                if(!Array.from(targetField.$wrapper.classList).includes(renderPrefs.wrapperHiddenClass)) {
                                     
-                                    if(depRuleObject.behavior === "hide") {
-                                        targetField.$wrapper.classList.add(renderPrefs.wrapperHiddenClass);
-                                        targetField.$wrapper.classList.remove(renderPrefs.wrapperVisibleClass);
-                                    }
+                                if(depRuleObject.behavior === "hide") {
+                                    targetField.$wrapper.classList.add(renderPrefs.wrapperHiddenClass);
+                                    targetField.$wrapper.classList.remove(renderPrefs.wrapperVisibleClass);
+                                }
 
-                                    if(depRuleObject.behavior === "disable") {
-                                        targetField.disable()
-                                    }
-                                
-                                    targetField.disableRules()
-                                    targetField.status = 1;
-                                    targetField._status = 1;
+                                if(depRuleObject.behavior === "disable") {
+                                    targetField.disable()
+                                }
+                            
+                                targetField.disableRules()
+                                targetField.status = 1;
+                                targetField._status = 1;
 
-                                    if(resetValueOnToggle) {
-                                        // targetField.setValue('')
-                                    }
+                                if(resetValueOnToggle) {
+                                    // targetField.setValue('')
                                 }
                             })
 
@@ -577,25 +575,23 @@ export default class FormValidator {
                             targetFields.forEach(targetField => {
                                 let renderPrefs = targetField.getFieldRenderPreferences();
 
-                                if(Array.from(targetField.$wrapper.classList).includes(renderPrefs.wrapperHiddenClass)) {
-
-                                    if(depRuleObject.behavior === "hide") {
-                                        targetField.$wrapper.classList.remove(renderPrefs.wrapperHiddenClass)
-                                        targetField.$wrapper.classList.add(renderPrefs.wrapperVisibleClass)
-                                    } 
-                                    
-                                    if(depRuleObject.behavior === "disable") {
-                                        targetField.enable()
-                                    }
-
-                                    targetField.enableRules()
-                                    targetField.status = undefined
-                                    targetField._status = undefined
-
-                                    if(resetValueOnToggle) {
-                                        targetField.setValue('')
-                                    }
+                                if(depRuleObject.behavior === "hide") {
+                                    targetField.$wrapper.classList.remove(renderPrefs.wrapperHiddenClass)
+                                    targetField.$wrapper.classList.add(renderPrefs.wrapperVisibleClass)
+                                } 
+                    
+                                if(depRuleObject.behavior === "disable") {
+                                    targetField.enable()
                                 }
+
+                                targetField.enableRules()
+                                targetField.status = undefined
+                                targetField._status = undefined
+
+                                if(resetValueOnToggle) {
+                                    targetField.setValue('')
+                                }
+                                
                             })
                         
                     }
