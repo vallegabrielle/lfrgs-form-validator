@@ -145,7 +145,7 @@ export default class FormValidatorField {
                     $field.focus();
                 }
             
-                if(this.getResetFieldValidationOnChange() || (isSelect && this.getOptionFromFieldOrRoot("validateFieldOnBlur"))) {
+                if(this.getOptionFromFieldOrRoot("resetFieldValidationOnChange") || (isSelect && this.getOptionFromFieldOrRoot("validateFieldOnBlur"))) {
                     let validate = () => {
                         this._validate().then((message) => {
                         }).catch((message) => {
