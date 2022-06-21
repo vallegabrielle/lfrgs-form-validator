@@ -77,38 +77,17 @@ export default class FormValidatorField {
         return events
     }
 
-
-    getValidateFieldOnBlur() {
-        if(this.validateFieldOnBlur === undefined) {
-            return this._validator.validateFieldOnBlur
+    getOptionFromFieldOrRoot(optionKey) {
+        if(this[optionKey] === undefined) {
+            if(this._validator[optionKey]) {
+                return this._validator[optionKey]
+            } else {
+                return undefined
+            }
         } else {
-            return this.validateFieldOnBlur
+            return this[optionKey]
         }
     }
-
-    getValidateFieldOnChange() {
-        if(this.validateFieldOnChange === undefined) {
-            return this._validator.validateFieldOnChange
-        } else {
-            return this.validateFieldOnChange
-        }
-    }
-    getResetFieldValidationOnChange() {
-        if(this.resetFieldValidationOnChange === undefined) {
-            return this._validator.resetFieldValidationOnChange
-        } else {
-            return this.resetFieldValidationOnChange
-        }
-    }
-
-    getValidateFieldOnInput() {
-        if(this.validateFieldOnInput === undefined) {
-            return this._validator.validateFieldOnInput
-        } else {
-            return this.validateFieldOnInput
-        }
-    }
-
 
     register() {
         
@@ -122,7 +101,7 @@ export default class FormValidatorField {
         this.status = undefined;
         this._status = undefined;
         this.message = undefined;
-        this.validationElements = [];
+        this.validationAppendedElements = [];
 
         var fieldRenderPreferences = this.getFieldRenderPreferences()
         if(fieldRenderPreferences.wrapperClass && fieldRenderPreferences.wrapperClass.length) {
@@ -160,13 +139,13 @@ export default class FormValidatorField {
                 this.status = undefined;
                 this._status = undefined;
 
-                if(this.getResetFieldValidationOnChange() || (isSelect && this.getValidateFieldOnBlur())) {
+                if(this.getOptionFromFieldOrRoot("resetFieldValidationOnChange") || (isSelect && this.getOptionFromFieldOrRoot("validateFieldOnBlur"))) {
                     this.setUnvalidated();
                     this.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: this}}))
                     $field.focus();
                 }
             
-                if(this.getValidateFieldOnInput() || (isSelect && this.getValidateFieldOnBlur())) {
+                if(this.Option() || (isSelect && this.getOptionFromFieldOrRoot("validateFieldOnBlur"))) {
                     let validate = () => {
                         this._validate().then((message) => {
                         }).catch((message) => {
@@ -184,23 +163,23 @@ export default class FormValidatorField {
 
 
 
-            var timeout;
+            var timeoutBlur;
             let handleFieldValidationOnBlur = () => {
-                if(this.getValidateFieldOnBlur() && this.interactive) {
+                if(this.getOptionFromFieldOrRoot("validateFieldOnBlur") && this.interactive) {
                     let validate = () => {
                         this._validate().then((message) => {
                         }).catch((message) => {
                         })
                     }
-                    clearTimeout(timeout);
-                    timeout = setTimeout(validate, 1)
+                    clearTimeout(timeoutBlur);
+                    timeoutBlur = setTimeout(validate, 1)
                     validate()
                 }
             }
 
-            var timeout;
+            var timeoutChange;
             let handleFieldValidationOnChange = () => {
-                if((this.getValidateFieldOnChange() || isRadioOrCheckbox) && this.interactive) {
+                if((this.getOptionFromFieldOrRoot("validateFieldOnChange") || isRadioOrCheckbox) && this.interactive) {
                     let validate = () => {
                         this._validate().then((message) => {
                         }).catch((message) => {
@@ -209,8 +188,8 @@ export default class FormValidatorField {
                             $field.focus()
                         })
                     }
-                    clearTimeout(timeout);
-                    timeout = setTimeout(validate, 1)
+                    clearTimeout(timeoutChange);
+                    timeoutChange = setTimeout(validate, 1)
                 }
             }
 
@@ -475,7 +454,7 @@ export default class FormValidatorField {
 
         if(!silentMode) {
 
-            this.removeValidationElements();
+            this.removeValidationAppendedElements();
 
             var fieldRenderPreferences = this.getFieldRenderPreferences()
 
@@ -501,7 +480,7 @@ export default class FormValidatorField {
                 let messageHTML = fieldRenderPreferences[statusName+"MessageHTML"].replace("{{message}}", message);
                 let $message = parseHTML(messageHTML);
                 this.$wrapper.appendChild($message);
-                this.validationElements.push($message);
+                this.validationAppendedElements.push($message);
             }
             
         }
@@ -526,9 +505,12 @@ export default class FormValidatorField {
     setInvalid(message, silentMode) {
         this._setFieldValidationStatus("invalid", message, silentMode) 
     }
+    resetValidation(message) {
+        this.setUnvalidated(message);
+    } 
 
     
-    removeValidationElements() {
+    removeValidationAppendedElements() {
         
         let fieldRenderPreferences = this.getFieldRenderPreferences()
 
@@ -549,10 +531,10 @@ export default class FormValidatorField {
             $field.classList.remove(fieldRenderPreferences.invalidClass);
         })
 
-        this.validationElements.forEach(validationElement => {
-            validationElement.remove()
+        this.validationAppendedElements.forEach(validationAppendedElement => {
+            validationAppendedElement.remove()
         })
-        this.validationElements = [];
+        this.validationAppendedElements = [];
     }
 
 

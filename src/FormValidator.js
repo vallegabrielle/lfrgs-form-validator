@@ -589,7 +589,7 @@ export default class FormValidator {
                                 targetField._status = undefined
 
                                 if(resetValueOnToggle) {
-                                    targetField.setValue('')
+                                    //targetField.setValue('') // TODO: Verificar antes se ja esta no show/hode
                                 }
                                 
                             })
@@ -689,7 +689,6 @@ export default class FormValidator {
                     this.hideLoading();
                     if(callback) {
                         this.events.onSubmit && (this.events.onSubmit(this));
-                        this.resetForm();
                     } else {
                         this.submitting = false
                         this._logger.log("submit(): Form can't be submitted", this); 
