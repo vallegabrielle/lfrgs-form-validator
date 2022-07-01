@@ -133,11 +133,13 @@ export default class FormValidator {
         if(this.enableDataRestore) {
             this.applyFormState();
             this.updateFormState();
+            this.validate(function(cb) {
+                this.updateDependencyRules()
+            })
         } else { 
             this.resetForm();
         }
 
-        this.updateDependencyRules()
         
         this.events.onInit && (this.events.onInit(this));
 
@@ -425,21 +427,12 @@ export default class FormValidator {
                         value = serializedForm[field.name];
                     }
                     field.setValue(value)
-                    if(this.enableValidateAfterDataRestore && storage.validation && storage.validation[field.name] !== undefined) {
-                        let validation = storage.validation[field.name];
-                        if(validation.status === 1) { 
-                            field.setValid(validation.message)
-                        } else if(validation.status === 0) { 
-                            field.setInvalid(validation.message)
-                        } else {
-                            field.setUnvalidated()
-                        }
-                    }
+
                 })
 
-                if(!this.enableValidateAfterDataRestore) {
-                    this.resetValidation()
-                }
+                this.resetValidation()
+                this._validate([], true).then(()=>{}).catch(()=>{})
+            
 
             }
 
@@ -549,13 +542,9 @@ export default class FormValidator {
                                     targetField.disable()
                                 }
                             
+                                // targetField.setValid()
                                 targetField.disableRules()
-                                targetField.status = 1;
-                                targetField._status = 1;
 
-                                if(resetValueOnToggle) {
-                                    // targetField.setValue('')
-                                }
                             })
 
 
@@ -584,13 +573,8 @@ export default class FormValidator {
                                     targetField.enable()
                                 }
 
+                                // targetField.setUnvalidated()
                                 targetField.enableRules()
-                                targetField.status = undefined
-                                targetField._status = undefined
-
-                                if(resetValueOnToggle) {
-                                    //targetField.setValue('') // TODO: Verificar antes se ja esta no show/hode
-                                }
                                 
                             })
                         
@@ -786,7 +770,7 @@ export default class FormValidator {
         let unvalidatingFieldsNames = [];
 
         repeatingFieldsNames.forEach(fieldName => {
-            this.fields[fieldName].removeValidationElements();
+            this.fields[fieldName].removeValidationAppendedElements();
             if(this.fields[fieldName].status === 0 || this.fields[fieldName].status === 1 || this.fields[fieldName].status === -1) {
                 revalidatingFieldsNames.push(fieldName)
             } else {
