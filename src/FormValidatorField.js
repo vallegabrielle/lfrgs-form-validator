@@ -308,7 +308,17 @@ export default class FormValidatorField {
     }
     
     isValid() {
-        return (!this.useRules || (this._status !== undefined && (this._status) === 1))
+
+        if(!this.useRules) {
+            return true;
+        }
+
+        if((this._status !== undefined && (this._status) === 1)) {
+            return true
+        }
+
+        return false;
+
     }
 
     disableRules() {
@@ -551,7 +561,7 @@ export default class FormValidatorField {
         let validatingMessage = fieldRenderPreferences.validatingMessage;
         let validMessage = fieldRenderPreferences.validMessage;
 
-        if(!this.useRules || !this.interactive) {
+        if(!this.useRules) {
             return new Promise((resolve, reject) => {
                 resolve()
             })
