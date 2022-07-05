@@ -145,7 +145,6 @@ export default class FormValidatorField {
                 if(this.getOptionFromFieldOrRoot("resetFieldValidationOnChange") || (isSelect && this.getOptionFromFieldOrRoot("validateFieldOnBlur"))) {
                     this.setUnvalidated();
                     this.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: this}}))
-                    $field.focus();
                 }
             
                 // Validate selects because they're change should also be understood as a blur
@@ -183,7 +182,7 @@ export default class FormValidatorField {
 
             var timeoutChange;
             let handleFieldValidationOnChange = () => {
-                if((this.getOptionFromFieldOrRoot("validateFieldOnChange") || isRadioOrCheckbox) && this.interactive) {
+                if((this.getOptionFromFieldOrRoot("validateFieldOnChange") || (isRadioOrCheckbox && this.getOptionFromFieldOrRoot("validateFieldOnBlur"))) && this.interactive) {
                     let validate = () => {
                         this._validate().then((message) => {
                         }).catch((message) => {
