@@ -8,7 +8,6 @@ const DEFAULT_OPTIONS = {
 
     debug: false,
     enableDataRestore: false, // will be deleted on form submission or reset
-    enableValidateAfterDataRestore: true, // will also remember validation statuses
 
     resetFieldValidationOnChange: true,
     validateFieldOnInput: false,

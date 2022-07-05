@@ -92,7 +92,6 @@ export default class FormValidator {
         this.groupWrapperHiddenClass = this.options.groupWrapperHiddenClass;
         this.groupWrapperVisibleClass = this.options.groupWrapperVisibleClass;
         this.enableDataRestore = this.options.enableDataRestore;
-        this.enableValidateAfterDataRestore = this.options.enableValidateAfterDataRestore;
 
         this.submitting = false;
         this.fields = {};
@@ -696,10 +695,8 @@ export default class FormValidator {
         this.events.onTrySubmit && (this.events.onTrySubmit(this));
 
         let firstInvalidField = this.getFirstInvalidField();
-
         if(firstInvalidField) {
-            firstInvalidField.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: firstInvalidField}}))
-            firstInvalidField.elements[0].focus();
+            firstInvalidField.focus();
         }
 
         
@@ -717,10 +714,8 @@ export default class FormValidator {
             }).catch(() => {
                 this.submitting = false;
                 let firstInvalidField = this.getFirstInvalidField();
-
                 if(firstInvalidField) {
-                    firstInvalidField.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: firstInvalidField}}))
-                    firstInvalidField.elements[0].focus();
+                    firstInvalidField.focus();
                 }
             })
         
