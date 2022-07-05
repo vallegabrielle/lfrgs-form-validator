@@ -137,10 +137,10 @@ class FormValidatorStepsHandler {
             this.update()
             this.steps[stepIndex].formValidatorInstance.$form.dispatchEvent(new CustomEvent('formValidatorShowStep', {detail: {currentStep: stepIndex}}))
             
-            var firstNotValidField = this.steps[stepIndex].formValidatorInstance.getFirstNotValidField();
-            if(firstNotValidField) {
-                firstNotValidField.focus()
-            }
+            // var firstNotValidField = this.steps[stepIndex].formValidatorInstance.getFirstNotValidField();
+            // if(firstNotValidField) {
+            //     firstNotValidField.focus()
+            // }
             if(this.onSetStep) {
                 this.onSetStep(_this)
             }
