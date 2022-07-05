@@ -377,6 +377,9 @@ export default class FormValidatorField {
         this.elements.forEach($field => {
             $field.setAttribute("disabled","disabled");
         })
+        if(this.disableFn) {
+            this.disableFn(this)
+        }
     }
 
 
@@ -385,6 +388,9 @@ export default class FormValidatorField {
         this.elements.forEach($field => {
             $field.removeAttribute("disabled");
         })
+        if(this.enableFn) {
+            this.enableFn(this)
+        }
     }
 
 

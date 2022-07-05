@@ -237,6 +237,21 @@ export default class FormValidator {
         return firstInvalidField
     }
 
+
+
+    getFirstNotValidField() {
+        let firstNotValidField = undefined;
+        Object.keys(this.fields).every((k) => {
+            let field = this.fields[k];
+            if(field._status !== 1) {
+                firstNotValidField = field;
+                return false;
+            }
+            return true
+        })
+        return firstNotValidField
+    }
+
     isValidating() {
         let isValidating = false;
         this.eachField(field => {
