@@ -14,7 +14,7 @@ class FormValidatorStepsHandler {
         this.currentStepClass = options.currentStepClass || "d-block"; // TODO: deixar configurável  
         this.hiddenStepClass = options.hiddenStepClass || "d-none" // TODO: deixar configurável  
         // this.onBeforeSetStep = options.onSetStep
-        // this.onSetStep = options.onSetStep
+        this.onSetStep = options.onSetStep
 
         return this.init()
     }
@@ -122,7 +122,7 @@ class FormValidatorStepsHandler {
         if(stepIndex < 0 || stepIndex >= this.steps.length || !this.steps[stepIndex]) {
             return;
         }
-
+        let _this = this;
         let _setStep = () => {
             for(let i = 0; i < this.steps.length; i++) {
                 let step = this.steps[i];
@@ -136,6 +136,9 @@ class FormValidatorStepsHandler {
             this.currentStepIndex = stepIndex;
             this.update()
             this.steps[stepIndex].formValidatorInstance.$form.dispatchEvent(new CustomEvent('formValidatorShowStep', {detail: {currentStep: stepIndex}}))
+            if(this.onSetStep) {
+                this.onSetStep(_this)
+            }
             return
         }
         
