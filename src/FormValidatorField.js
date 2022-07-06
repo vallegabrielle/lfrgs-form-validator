@@ -144,7 +144,6 @@ export default class FormValidatorField {
 
                 if(this.getOptionFromFieldOrRoot("resetFieldValidationOnChange") || (isSelect && this.getOptionFromFieldOrRoot("validateFieldOnBlur"))) {
                     this.setUnvalidated();
-                    this.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: this}}))
                 }
             
                 // Validate selects because they're change should also be understood as a blur
@@ -153,7 +152,6 @@ export default class FormValidatorField {
                         this._validate().then((message) => {
                         }).catch((message) => {
                         }).finally(() => {
-                            this.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: this}}))
                             $field.focus()
                         })
                     }
@@ -187,7 +185,6 @@ export default class FormValidatorField {
                         this._validate().then((message) => {
                         }).catch((message) => {
                         }).finally(() => {
-                            this.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: this}}))
                             $field.focus()
                         })
                     }
@@ -440,13 +437,15 @@ export default class FormValidatorField {
     }
 
     focus() {
+        this.elements[0].focus()
+        
         if(this.focusFn) {
             this.focusFn()
         } else {
-            this.elements[0].focus()
         }            
-        
+
         this.$wrapper.dispatchEvent(new CustomEvent('formValidatorFieldFocus', {detail: {formValidatorField: this}}))
+        
     }
 
     _setFieldValidationStatus(statusName, message, silentMode=false) {

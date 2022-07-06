@@ -116,8 +116,16 @@ class FormValidatorStepsHandler {
         (this.onUpdate) && this.onUpdate(this);
         
     }
+    
+    focusStepFirstNotValidField(stepIndex) {
+        var firstNotValidField = this.steps[stepIndex].formValidatorInstance.getFirstNotValidField();
+        if(firstNotValidField) {
+            firstNotValidField.focus()
+        }
+        
+    }
 
-    setStep(stepIndex) {
+    setStep(stepIndex, focusStepFirstNotValidField=true) {    
         
         if(stepIndex < 0 || stepIndex >= this.steps.length || !this.steps[stepIndex]) {
             return;
@@ -135,19 +143,19 @@ class FormValidatorStepsHandler {
 
             this.currentStepIndex = stepIndex;
             this.update()
-            this.steps[stepIndex].formValidatorInstance.$form.dispatchEvent(new CustomEvent('formValidatorShowStep', {detail: {currentStep: stepIndex}}))
         
-
+            if(focusStepFirstNotValidField) {
+                this.focusStepFirstNotValidField(this.currentStepIndex)
+            }
+            
             if(this.onSetStep) {
                 this.onSetStep(_this)
             }
             return
         }
 
-        var firstNotValidField = this.steps[stepIndex].formValidatorInstance.getFirstNotValidField();
-        if(firstNotValidField) {
-            firstNotValidField.focus()
-        }
+        this.steps[stepIndex].formValidatorInstance.$form.dispatchEvent(new CustomEvent('formValidatorShowStep', {detail: {currentStep: stepIndex}}))
+
         
         if(this.enableStrictStepsOrder) {
             
@@ -162,6 +170,9 @@ class FormValidatorStepsHandler {
                 _setStep()
             }).catch(() => {
                 this.steps[this.currentStepIndex].formValidatorInstance.submit()
+                if(focusStepFirstNotValidField) {
+                    this.focusStepFirstNotValidField(this.currentStepIndex)
+                }
             })
 
             
@@ -198,7 +209,7 @@ class FormValidatorStepsHandler {
     }
 
     start() {
-        this.setStep(0);
+        this.setStep(0, false);
     }
 
 
