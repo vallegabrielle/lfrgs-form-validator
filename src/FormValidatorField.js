@@ -259,7 +259,6 @@ export default class FormValidatorField {
 
         if(this.setValueFn && typeof this.setValueFn === 'function') {
             this.setValueFn(this);
-            this._validator.updateDependencyRules();
 
         } else {
 
@@ -304,6 +303,8 @@ export default class FormValidatorField {
             this._validator.updateDependencyRules();
 
         }
+
+        this._validator.updateDependencyRules();
                 
     }
     
